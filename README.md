@@ -1,7 +1,3 @@
-# cookie-tracker
-Track your baking and build your shopping list
-
-
 # Christmas Cookie Tracker
 
 A single-file HTML app for planning a holiday baking season: a recipe book, a bake plan with a suggested order, and a shopping list that totals ingredients and rounds up to store packages.
