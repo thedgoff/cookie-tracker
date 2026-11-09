@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Christmas Cookie Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a kitchen binder. Tabs across the top, a cookie index down the side, the open recipe card in the middle. */
+:root{
+  --bg:#f4f6f4; --surface:#ffffff; --ink:#1d2a24; --muted:#5d6b64; --line:#d9e0dc;
+  --spruce:#1f5c45; --spruce-soft:#e2efe8; --cran:#b3263e; --cran-soft:#f8e3e7; --butter:#f6d365; --butter-soft:#fdf3d2;
+  --made:#2f8a5b; --planned:#8a8f8c; --odd:#c98a1a;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121815; --surface:#1a221e; --ink:#e7eee9; --muted:#9fb0a7; --line:#2d3833;
+    --spruce:#6cc79b; --spruce-soft:#203a2e; --cran:#f07a8d; --cran-soft:#3a1f26; --butter:#e9c25a; --butter-soft:#3a321b;
+    --made:#5fd095; --planned:#8d9892; --odd:#e3aa45; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121815; --surface:#1a221e; --ink:#e7eee9; --muted:#9fb0a7; --line:#2d3833;
+  --spruce:#6cc79b; --spruce-soft:#203a2e; --cran:#f07a8d; --cran-soft:#3a1f26; --butter:#e9c25a; --butter-soft:#3a321b;
+  --made:#5fd095; --planned:#8d9892; --odd:#e3aa45; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--spruce);outline-offset:2px}
+a{color:var(--spruce)}
+.num{font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:14px 20px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header.top h1{font-size:1.35rem;color:var(--spruce)}
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
+nav.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:8px;font-weight:600;color:var(--muted)}
+nav.tabs button[aria-selected="true"]{background:var(--spruce);color:var(--surface)}
+.yearpick{margin-left:auto;display:flex;align-items:center;gap:8px}
+.yearpick label{font-size:.85rem;color:var(--muted)}
+select,input[type=text],input[type=number],input[type=url],textarea{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+textarea{width:100%;min-height:90px;resize:vertical}
+.sync{font-size:.8rem;color:var(--muted)}
+.sync.err{color:var(--cran)}
+main{padding:20px;max-width:1280px;margin:0 auto}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-weight:600}
+.btn:hover{border-color:var(--spruce)}
+.btn.primary{background:var(--spruce);border-color:var(--spruce);color:var(--surface)}
+.btn.danger{color:var(--cran)}
+.btn.small{padding:3px 9px;font-size:.85rem}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:.8rem;font-weight:600;border:1px solid var(--line);background:var(--surface);white-space:nowrap}
+.chip.made{background:var(--made);border-color:var(--made);color:var(--surface)}
+.chip.planned{border-style:dashed;color:var(--muted)}
+.chip.odd{border-color:var(--odd);color:var(--odd)}
+.chip.frz{background:var(--spruce-soft);border-color:transparent;color:var(--spruce)}
+.chip.temp{background:var(--cran-soft);border-color:transparent;color:var(--cran)}
+.chip.chill{background:var(--butter-soft);border-color:transparent}
+button.chip{cursor:pointer}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+.banner{padding:10px 14px;border-radius:8px;background:var(--butter-soft);margin-bottom:14px;font-size:.92rem}
+
+/* Recipe book */
+.book{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+.side{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;position:sticky;top:76px;max-height:calc(100vh - 96px);display:flex;flex-direction:column;gap:10px}
+.side input{width:100%}
+.side .filters{display:flex;gap:6px;flex-wrap:wrap}
+.side ul{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
+.side li button{width:100%;text-align:left;border:0;background:transparent;padding:7px 8px;border-radius:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.side li button:hover{background:var(--spruce-soft)}
+.side li button[aria-current="true"]{background:var(--spruce-soft);font-weight:700;color:var(--spruce)}
+.dots{display:flex;gap:3px;flex-shrink:0}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.dot.m{background:var(--made)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.rhead{display:grid;grid-template-columns:240px 1fr;gap:22px}
+.photo{aspect-ratio:4/3;border-radius:10px;background:var(--spruce-soft);display:grid;place-items:center;overflow:hidden;position:relative;color:var(--muted);text-align:center;font-size:.9rem}
+.photo img{width:100%;height:100%;object-fit:cover}
+.photo label{position:absolute;bottom:8px;right:8px}
+.rhead h2{font-size:2rem;margin-bottom:6px}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.yearrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}
+.scale{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;background:var(--butter-soft);border-radius:10px;margin:16px 0}
+.scale input{width:80px}
+.cols{display:grid;grid-template-columns:minmax(260px,1fr) 1.4fr;gap:26px;margin-top:8px}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.q{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+ol.steps{padding-left:22px;margin:8px 0}
+ol.steps li{margin-bottom:8px;max-width:65ch}
+details summary{cursor:pointer;color:var(--muted);font-weight:600;margin-top:12px}
+details ul{margin:6px 0;padding-left:20px}
+.section-h{font-size:1.05rem;margin:18px 0 6px;color:var(--spruce)}
+.notes textarea{min-height:110px}
+.editgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.editgrid label,.field{display:flex;flex-direction:column;gap:4px;font-size:.85rem;color:var(--muted)}
+.ingedit td{padding:3px 4px}
+.ingedit input,.ingedit select{width:100%}
+
+/* Plan */
+.plan{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.planlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.prow{display:grid;grid-template-columns:28px 34px 1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:10px;padding:10px 12px}
+.prow[data-status="dough"]{border-left-color:var(--butter)}
+.prow[data-status="baked"]{border-left-color:var(--spruce)}
+.prow[data-status="done"]{border-left-color:var(--made);opacity:.75}
+.prow.dragging{opacity:.4}
+.prow.over{outline:2px dashed var(--spruce)}
+.grip{cursor:grab;color:var(--muted);user-select:none;text-align:center;font-size:1.1rem}
+.pnum{font-family:var(--display);font-weight:700;font-size:1.2rem;color:var(--spruce);text-align:center}
+.pname{font-weight:700}
+.pname button{border:0;background:none;padding:0;font-weight:700;text-align:left}
+.pname button:hover{color:var(--spruce);text-decoration:underline}
+.why{font-size:.83rem;color:var(--muted)}
+.pctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pctl input{width:62px}
+.phase-h{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:10px 0 0;font-weight:700}
+.picker{max-height:520px;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.picker label{display:flex;gap:8px;align-items:center;padding:4px 6px;border-radius:6px}
+.picker label:hover{background:var(--spruce-soft)}
+.picker .past{margin-left:auto;font-size:.75rem;color:var(--muted)}
+.history{display:grid;gap:10px}
+.history .yr{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:start}
+.history .yr b{font-family:var(--display)}
+.history .list{display:flex;flex-wrap:wrap;gap:5px}
+.confirmbar{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--cran-soft);margin-bottom:10px;flex-wrap:wrap}
+.summary{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:120px}
+.tile b{font-family:var(--display);font-size:1.5rem;display:block;line-height:1.1}
+.tile span{font-size:.8rem;color:var(--muted)}
+
+/* Shopping */
+.shopbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.shop td input[type=number]{width:70px}
+.shop tr.skip td{color:var(--muted)}
+.shop tr.skip td.name{text-decoration:line-through}
+.shop .uses{font-size:.78rem;color:var(--muted)}
+.tog{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.8rem;background:var(--surface)}
+.tog.yes{background:var(--cran);border-color:var(--cran);color:var(--surface)}
+.clean{max-width:640px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:24px}
+.clean h3{font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:16px 0 4px}
+.clean ul{list-style:none;padding:0;margin:0}
+.clean li label{display:flex;gap:10px;align-items:baseline;padding:7px 2px;border-bottom:1px dotted var(--line);cursor:pointer}
+.clean li input{width:18px;height:18px;flex-shrink:0;accent-color:var(--spruce)}
+.clean li.got .t{text-decoration:line-through;color:var(--muted)}
+.clean .amt{margin-left:auto;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.extras{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:8px 16px;border-radius:8px;font-size:.9rem;z-index:20}
+
+/* Add */
+.addform{display:grid;gap:14px;max-width:820px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+@media (max-width:900px){
+  .book,.plan{grid-template-columns:1fr}
+  .side{position:static;max-height:none}
+  .side ul{max-height:260px}
+  .rhead,.cols,.two{grid-template-columns:1fr}
+  .yearpick{margin-left:0}
+}
+@media (max-width:480px){
+  main{padding:12px}
+  .prow{grid-template-columns:22px 26px 1fr}
+  .pctl{grid-column:1/-1;justify-content:flex-start}
+}
+@media print{
+  header.top,.noprint{display:none!important}
+  body{background:#fff}
+  .clean{border:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Christmas Cookie Tracker</h1>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="book" id="tab-book">Recipe book</button>
+    <button role="tab" data-tab="plan" id="tab-plan">Bake plan</button>
+    <button role="tab" data-tab="shop" id="tab-shop">Shopping list</button>
+    <button role="tab" data-tab="add" id="tab-add">Add a recipe</button>
+  </nav>
+  <div class="yearpick">
+    <label for="year">Year</label>
+    <select id="year"></select>
+    <button class="btn small" id="newyear" title="Start a new year or event">+ Year</button>
+    <span class="sync" id="sync">Loading…</span>
+  </div>
+</header>
+<main id="main"></main>
+<div class="toast hidden" id="toast" role="status"></div>
+
+<!-- RECIPE LIBRARY: replace this JSON with your own recipes (format described in PROMPT.md) -->
+<script type="application/json" id="library">
+{
+ "catalog": {
+  "almond_ext": {
+   "label": "Almond extract",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "almond_flour": {
+   "label": "Almond flour",
+   "unit": "g",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "apple_cider": {
+   "label": "Apple cider",
+   "unit": "C",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "apple_juice": {
+   "label": "Apple juice",
+   "unit": "tbsp",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "apples": {
+   "label": "Apples",
+   "unit": "ea",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "bp": {
+   "label": "Baking powder",
+   "unit": "tsp",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "bs": {
+   "label": "Baking soda",
+   "unit": "tsp",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "brown_dark": {
+   "label": "Brown sugar (dark)",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "brown_light": {
+   "label": "Brown sugar (light)",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "butter_salted": {
+   "label": "Butter (salted)",
+   "unit": "C",
+   "cat": "Dairy & eggs",
+   "pkg": 2,
+   "pkgLabel": "1 lb box"
+  },
+  "butter": {
+   "label": "Butter (unsalted)",
+   "unit": "C",
+   "cat": "Dairy & eggs",
+   "pkg": 2,
+   "pkgLabel": "1 lb box"
+  },
+  "buttermilk": {
+   "label": "Buttermilk",
+   "unit": "C",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "butterscotch": {
+   "label": "Butterscotch chips",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": 2,
+   "pkgLabel": "11 oz bag"
+  },
+  "candy_cane": {
+   "label": "Candy canes",
+   "unit": "ea",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cardamom": {
+   "label": "Cardamom",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cheerios": {
+   "label": "Cheerios",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "choc_bitter": {
+   "label": "Chocolate, bittersweet bar",
+   "unit": "oz",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "choc_melt": {
+   "label": "Chocolate, melting",
+   "unit": "oz",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "choc_unsw": {
+   "label": "Chocolate, unsweetened",
+   "unit": "oz",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "chips_bitter": {
+   "label": "Chocolate chips (bittersweet)",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": 2,
+   "pkgLabel": "bag"
+  },
+  "chips_semi": {
+   "label": "Chocolate chips (semisweet)",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": 2,
+   "pkgLabel": "12 oz bag"
+  },
+  "chips_white": {
+   "label": "Chocolate chips (white)",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": 2,
+   "pkgLabel": "bag"
+  },
+  "cinnamon": {
+   "label": "Cinnamon",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cloves": {
+   "label": "Cloves",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cocoa": {
+   "label": "Cocoa powder",
+   "unit": "tbsp",
+   "cat": "Baking staples",
+   "pkg": 32,
+   "pkgLabel": "8 oz can"
+  },
+  "coconut": {
+   "label": "Coconut",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "condensed": {
+   "label": "Sweetened condensed milk",
+   "unit": "can",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "corn_syrup": {
+   "label": "Corn syrup",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cornstarch": {
+   "label": "Cornstarch",
+   "unit": "tbsp",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cranberries": {
+   "label": "Cranberries (fresh)",
+   "unit": "C",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cran_dried": {
+   "label": "Cranberries (dried)",
+   "unit": "C",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "cream_cheese": {
+   "label": "Cream cheese",
+   "unit": "oz",
+   "cat": "Dairy & eggs",
+   "pkg": 8,
+   "pkgLabel": "8 oz block"
+  },
+  "tartar": {
+   "label": "Cream of tartar",
+   "unit": "tsp",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "dates": {
+   "label": "Dates (pitted)",
+   "unit": "oz",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "eggs": {
+   "label": "Eggs",
+   "unit": "ea",
+   "cat": "Dairy & eggs",
+   "pkg": 12,
+   "pkgLabel": "dozen"
+  },
+  "egg_whites": {
+   "label": "Egg whites",
+   "unit": "ea",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "espresso": {
+   "label": "Espresso powder",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "flour": {
+   "label": "Flour (all-purpose)",
+   "unit": "C",
+   "cat": "Baking staples",
+   "pkg": 18,
+   "pkgLabel": "5 lb bag"
+  },
+  "cake_flour": {
+   "label": "Flour (cake)",
+   "unit": "C",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "ginger": {
+   "label": "Ginger (ground)",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "heavy_cream": {
+   "label": "Heavy cream",
+   "unit": "C",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "honey": {
+   "label": "Honey",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "hc_mix": {
+   "label": "Hot chocolate mix",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "kisses": {
+   "label": "Hershey's Kisses",
+   "unit": "ea",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "lemon": {
+   "label": "Lemon",
+   "unit": "ea",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "maple_ext": {
+   "label": "Maple extract",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "marsh_mini_col": {
+   "label": "Marshmallows (mini, colored)",
+   "unit": "C",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "marshmallows": {
+   "label": "Marshmallows (large)",
+   "unit": "ea",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "meringue": {
+   "label": "Meringue powder",
+   "unit": "tbsp",
+   "cat": "Baking staples",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "milk": {
+   "label": "Milk",
+   "unit": "C",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "molasses": {
+   "label": "Molasses",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "nonmelt_sugar": {
+   "label": "Non-melting topping sugar",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "nutmeg": {
+   "label": "Nutmeg",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "allspice": {
+   "label": "Allspice",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "olive_oil": {
+   "label": "Olive oil",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "orange_zest": {
+   "label": "Orange zest",
+   "unit": "tsp",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "oreos": {
+   "label": "Oreos",
+   "unit": "oz",
+   "cat": "Chocolate & candy",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pb": {
+   "label": "Peanut butter",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "peanuts": {
+   "label": "Peanuts",
+   "unit": "C",
+   "cat": "Nuts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pecans": {
+   "label": "Pecans",
+   "unit": "C",
+   "cat": "Nuts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pecan_halves": {
+   "label": "Pecan halves",
+   "unit": "C",
+   "cat": "Nuts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "peppermint": {
+   "label": "Peppermint extract",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pie_dough": {
+   "label": "Pie dough (refrigerated)",
+   "unit": "pkg",
+   "cat": "Dairy & eggs",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pistachios": {
+   "label": "Pistachios",
+   "unit": "C",
+   "cat": "Nuts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pps": {
+   "label": "Pumpkin pie spice",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "pumpkin": {
+   "label": "Pumpkin puree",
+   "unit": "C",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "rice_krispies": {
+   "label": "Rice Krispies",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "shortening": {
+   "label": "Shortening",
+   "unit": "tsp",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "jam": {
+   "label": "Strawberry/raspberry jam",
+   "unit": "C",
+   "cat": "Produce & fruit",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "powdered": {
+   "label": "Sugar (powdered)",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": 9,
+   "pkgLabel": "2 lb bag"
+  },
+  "sugar": {
+   "label": "Sugar (granulated)",
+   "unit": "C",
+   "cat": "Sugars",
+   "pkg": 9,
+   "pkgLabel": "4 lb bag"
+  },
+  "superfine": {
+   "label": "Sugar (superfine)",
+   "unit": "g",
+   "cat": "Sugars",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "vanilla": {
+   "label": "Vanilla extract",
+   "unit": "tsp",
+   "cat": "Spices & extracts",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "veg_oil": {
+   "label": "Vegetable oil",
+   "unit": "C",
+   "cat": "Other",
+   "pkg": null,
+   "pkgLabel": ""
+  },
+  "walnuts": {
+   "label": "Walnuts",
+   "unit": "C",
+   "cat": "Nuts",
+   "pkg": null,
+   "pkgLabel": ""
+  }
+ },
+ "recipes": []
+}
+</script>
+<script>
+"use strict";
+/* ---------- state ---------- */
+const S = {
+  lib:null, catalog:{}, over:{}, plans:{}, settings:{}, tab:'book', year:'2026', sel:null,
+  q:'', filter:'all', scale:{}, edit:false, shopView:'table', confirmOrder:false,
+  db:null, assets:null, sample:null, canWrite:true
+};
+const CUR_YEAR = String(new Date().getFullYear());
+S.year = CUR_YEAR;
+try{ const t=localStorage.getItem('ck_tab'); if(t) S.tab=t; const y=localStorage.getItem('ck_year'); if(y) S.year=y; }catch(e){}
+if(['book','plan','shop','add'].includes(location.hash.slice(1))) S.tab=location.hash.slice(1);
+
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.remove('hidden');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.add('hidden'),2600)}
+function setSync(msg,err){const s=$('#sync');s.textContent=msg;s.classList.toggle('err',!!err)}
+
+/* ---------- units & numbers ---------- */
+const VOL={tsp:1,tbsp:3,C:48};
+function conv(q,from,to){ if(from===to) return q; if(VOL[from]&&VOL[to]) return q*VOL[from]/VOL[to]; return null; }
+const FR=[[0,''],[1/8,'⅛'],[1/4,'¼'],[1/3,'⅓'],[3/8,'⅜'],[1/2,'½'],[5/8,'⅝'],[2/3,'⅔'],[3/4,'¾'],[7/8,'⅞'],[1,'']];
+function nice(q,unit){
+  if(q==null||isNaN(q)) return '';
+  if(unit==='g'||unit==='oz'&&q>=4) return String(Math.round(q*10)/10);
+  if(['C','tsp','tbsp','oz','pkg','can'].includes(unit)||!unit||unit==='ea'){
+    let w=Math.floor(q), f=q-w, best=FR[0], bd=9;
+    for(const fr of FR){const d=Math.abs(f-fr[0]); if(d<bd){bd=d;best=fr}}
+    if(bd>0.04) return (Math.round(q*100)/100).toString();
+    if(best[0]===1){w+=1;best=FR[0]}
+    if(unit==='ea'&&q>=1) return String(Math.round(q*100)/100);
+    return (w?String(w):'')+(best[1]||'')||'0';
+  }
+  return String(Math.round(q*100)/100);
+}
+const UNIT_LABEL={C:'cup',tsp:'tsp',tbsp:'tbsp',oz:'oz',g:'g',ea:'',pkg:'pkg',can:'can'};
+function fmtQty(q,unit){ let u=UNIT_LABEL[unit]??unit; if(unit==='C') u=q>1.01?'cups':'cup'; return (nice(q,unit)+' '+u).trim(); }
+function friendlyVol(q,unit){ // show small cup amounts as tbsp
+  if(unit==='C'&&q>0&&q<0.25) return fmtQty(q*16,'tbsp');
+  if(unit==='tsp'&&q>=6) return fmtQty(q/3,'tbsp');
+  if(unit==='tbsp'&&q>=8) return fmtQty(q/16,'C');
+  return fmtQty(q,unit);
+}
+function hours(s){ if(!s) return 0; s=String(s).toLowerCase(); if(s.includes('overnight')) return 12;
+  if(s.includes('+')) return s.split('+').reduce((a,b)=>a+(parseFloat(b)||0),0);
+  const m=s.match(/[\d.]+/g); return m?Math.max(...m.map(Number)):0; }
+function slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)||('r'+Date.now())}
+
+/* ---------- data merge ---------- */
+function catalog(){ return Object.assign({}, S.lib?S.lib.catalog:{}, S.settings.catalog||{}); }
+function pkgOf(k){ const c=catalog()[k]||{}; const o=(S.settings.pkg||{})[k]||{}; return {size: o.size!==undefined?o.size:c.pkg, label: o.label!==undefined?o.label:(c.pkgLabel||'')}; }
+function recipes(){
+  const base={}; (S.lib?S.lib.recipes:[]).forEach(r=>base[r.id]=r);
+  const ids=new Set([...Object.keys(base),...Object.keys(S.over)]);
+  const out=[];
+  ids.forEach(id=>{ const o=S.over[id]||{}; if(o.deleted) return; const b=base[id]||{};
+    if(!b.id&&!o.name) return;
+    const r=Object.assign({}, b, o, {id}); r.years=Object.assign({}, b.years||{}, o.years||{});
+    Object.keys(r.years).forEach(y=>{ if(!r.years[y]) delete r.years[y]; });
+    out.push(r); });
+  return out.sort((a,b)=>a.name.localeCompare(b.name));
+}
+function rec(id){ return recipes().find(r=>r.id===id); }
+function allYears(){ const ys=new Set([CUR_YEAR]); recipes().forEach(r=>Object.keys(r.years).forEach(y=>ys.add(y))); Object.keys(S.plans).forEach(y=>ys.add(y)); (S.settings.years||[]).forEach(y=>ys.add(y)); return [...ys].sort().reverse(); }
+function plan(y=S.year){ return S.plans[y]||{items:{},order:[],need:{},got:{},extras:[]}; }
+function planRecipes(y=S.year){ return recipes().filter(r=>r.years[y]); }
+function mult(id,y=S.year){ const it=(plan(y).items||{})[id]; return it&&it.mult?it.mult:1; }
+function status(id,y=S.year){ const it=(plan(y).items||{})[id]; return it&&it.status||'todo'; }
+const STATE_LABEL={m:'made',p:'on the list',h:'unclear'};
+
+/* ---------- persistence ---------- */
+const queue={};
+function saveDoc(path,dataFn){
+  const q=queue[path]||(queue[path]={busy:false,again:false,fn:null});
+  q.fn=dataFn; q.dirty=true; clearTimeout(q.t); q.t=setTimeout(()=>flush(path),350);
+}
+async function flush(path){
+  const q=queue[path]; if(q.busy){q.again=true;return}
+  q.busy=true; const data=JSON.parse(JSON.stringify(q.fn()));
+  try{
+    if(S.db){ setSync('Saving…'); await S.db.doc(path).set(data); setSync('Saved'); }
+    else { try{localStorage.setItem('ck:'+path,JSON.stringify(data))}catch(e){} setSync('Saved on this device only'); }
+  }catch(e){
+    if(e&&e.code==='invalid_argument'&&S.canWrite){ S.canWrite=false; toast('You can view this tracker but not change it.'); }
+    else if(e&&e.code==='unavailable'){ setTimeout(()=>{q.busy=false;flush(path)},800+Math.random()*800); return; }
+    else if(e&&e.code==='quota_exceeded') toast('Storage is full: '+(e.message||''));
+    setSync('Not saved',true);
+  }
+  q.busy=false; if(q.again){q.again=false;flush(path)} else q.dirty=false;
+}
+function pending(path){ const q=queue[path]; return !!(q&&(q.busy||q.dirty)); }
+function setOver(id,patch){
+  const cur=Object.assign({}, S.over[id]||{}); Object.assign(cur,patch); S.over[id]=cur;
+  saveDoc('recipes/'+id,()=>S.over[id]);
+}
+function setYearTag(id,y,state){
+  const r=rec(id); const yrs=Object.assign({}, (S.over[id]||{}).years||{});
+  yrs[y]=state||null; // null removes (merge drops falsy)
+  setOver(id,{years:yrs});
+}
+function setPlan(mut,y=S.year){
+  const p=JSON.parse(JSON.stringify(plan(y))); p.items=p.items||{}; p.order=p.order||[]; p.need=p.need||{}; p.got=p.got||{}; p.extras=p.extras||[];
+  mut(p); p._year=y; S.plans[y]=p; saveDoc('plans/'+docId(y),()=>S.plans[y]);
+}
+function docId(y){ return y.replace(/[^A-Za-z0-9_\-.~:@+]/g,'_'); }
+function setSettings(mut){ const s=JSON.parse(JSON.stringify(S.settings||{})); mut(s); S.settings=s; saveDoc('settings/main',()=>S.settings); }
+
+/* ---------- boot ---------- */
+async function boot(){
+  try{ const emb=document.getElementById('library'); S.lib=emb?JSON.parse(emb.textContent):await (await fetch('library.json')).json(); }catch(e){ S.lib={catalog:{},recipes:[]}; toast('Could not load the starter recipe library.'); }
+  // local fallback first
+  try{ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i); if(!k.startsWith('ck:'))continue; const p=k.slice(3), v=JSON.parse(localStorage.getItem(k));
+      if(p.startsWith('recipes/')) S.over[p.slice(8)]=v; else if(p.startsWith('plans/')) S.plans[v._year||p.slice(6)]=v; else if(p==='settings/main') S.settings=v; } }catch(e){}
+  render();
+  if(window.claude&&claude.use){
+    claude.use('assets').then(a=>{S.assets=a; scheduleRender();}).catch(()=>{});
+    claude.use('sample').then(s=>{S.sample=s; scheduleRender();}).catch(()=>{});
+    const db=await claude.use('db').catch(()=>null);
+    if(db){ S.db=db; S.over={}; S.plans={}; S.settings={}; listen(); }
+    else setSync('Saved on this device only');
+  } else setSync('Saved on this device only');
+}
+let _snaps=0,_rq=0;
+function scheduleRender(){ if(!_rq) _rq=setTimeout(()=>{_rq=0;render()},30); }
+function listen(){
+  let first=0; const need=3; const timer=setTimeout(()=>setSync('Can\'t reach saved data yet',true),10000);
+  const done=(snap)=>{ _snaps++; $('#sync').title='updates: '+_snaps; if(snap&&snap.metadata&&!snap.metadata.fromCache&&first<need){ first++; if(first>=need){clearTimeout(timer); setSync('Synced');} } };
+  const err=e=>{clearTimeout(timer); setSync('Sync stopped: reload the page',true)};
+  S.db.collection('recipes').onSnapshot(snap=>{ try{
+    done(snap); const next={};
+    snap.docs.forEach(d=>{ next[d.id]=pending('recipes/'+d.id)&&S.over[d.id]?S.over[d.id]:JSON.parse(JSON.stringify(d.data()||{})); });
+    Object.keys(S.over).forEach(id=>{ if(!next[id]&&pending('recipes/'+id)) next[id]=S.over[id]; });
+    if(JSON.stringify(next)===JSON.stringify(S.over)) return;
+    S.over=next; scheduleRender(); }catch(e){console.error(e)}
+  },err);
+  S.db.collection('plans').onSnapshot(snap=>{ try{
+    done(snap); const next={};
+    snap.docs.forEach(d=>{ const v=JSON.parse(JSON.stringify(d.data()||{})); const y=v._year||d.id; next[y]=pending('plans/'+d.id)&&S.plans[y]?S.plans[y]:v; });
+    Object.keys(S.plans).forEach(y=>{ if(!next[y]&&pending('plans/'+docId(y))) next[y]=S.plans[y]; });
+    if(JSON.stringify(next)===JSON.stringify(S.plans)) return;
+    S.plans=next; scheduleRender(); }catch(e){console.error(e)}
+  },err);
+  S.db.doc('settings/main').onSnapshot(d=>{ try{ done(d); if(pending('settings/main')) return; const v=d.exists?JSON.parse(JSON.stringify(d.data())):{};
+    if(JSON.stringify(v)===JSON.stringify(S.settings)) return; S.settings=v; scheduleRender(); }catch(e){console.error(e)} },err);
+}
+/* ---------- render ---------- */
+let _rc=0,_rt=0,_dead=false;
+function render(){
+  if(_dead) return; const now=Date.now(); if(now-_rt>1000){_rt=now;_rc=0} if(++_rc>40){_dead=true; $('#main').innerHTML='<div class="banner">Render loop stopped. '+esc(new Error().stack)+'</div>'; return;}
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)));
+  const ys=allYears(); if(!ys.includes(S.year)) ys.unshift(S.year);
+  const ysel=$('#year'); const cur=ysel.value;
+  ysel.innerHTML=ys.map(y=>`<option value="${esc(y)}"${y===S.year?' selected':''}>${esc(y)}</option>`).join('');
+  const m=$('#main'); const active=document.activeElement; const keep=active&&active.id&&m.contains(active)?{id:active.id,s:active.selectionStart,e:active.selectionEnd}:null;
+  const scroll=$('.side ul')?$('.side ul').scrollTop:0;
+  if(S.tab==='book') m.innerHTML=viewBook();
+  else if(S.tab==='plan') m.innerHTML=viewPlan();
+  else if(S.tab==='shop') m.innerHTML=viewShop();
+  else m.innerHTML=viewAdd();
+  if($('.side ul')) $('.side ul').scrollTop=scroll;
+  if(keep){const el=document.getElementById(keep.id); if(el){el.focus(); try{if(keep.s!=null)el.setSelectionRange(keep.s,keep.e)}catch(e){}}}
+  wireDnD();
+}
+function yearChips(r,clickable){
+  return Object.keys(r.years).sort().map(y=>{const st=r.years[y]; const cls=st==='m'?'made':st==='h'?'odd':'planned';
+    const t=`${y}: ${STATE_LABEL[st]||st}`+(clickable?' (click to change)':'');
+    return clickable?`<button class="chip ${cls}" data-act="cycleyear" data-id="${esc(r.id)}" data-y="${esc(y)}" title="${esc(t)}">${esc(y)}${st==='m'?' ✓':''}</button>`
+      :`<span class="chip ${cls}" title="${esc(t)}">${esc(y)}${st==='m'?' ✓':''}</span>`}).join('');
+}
+function facts(r){
+  const f=[];
+  if(r.freezable) f.push('<span class="chip frz">Freezes well</span>');
+  if(r.temp) f.push(`<span class="chip temp">${esc(r.temp)}°F</span>`);
+  if(r.cook) f.push(`<span class="chip">Bake ${esc(r.cook)} min</span>`);
+  if(r.chill) f.push(`<span class="chip chill">Chill ${esc(r.chill)} h</span>`);
+  if(r.kind&&r.kind!=='bake') f.push(`<span class="chip">${({nobake:'No-bake',candy:'Candy',icing:'Icing / frosting'})[r.kind]||esc(r.kind)}</span>`);
+  if(r.yield) f.push(`<span class="chip">Makes ${esc(r.yield)}</span>`);
+  return f.join('');
+}
+function photoUrl(r){ return r.photoId?('/_blob/'+r.photoId):(r.photoUrl||''); }
+
+/* ----- Recipe book ----- */
+function viewBook(){
+  const rs=recipes(); if(!S.sel||!rs.find(r=>r.id===S.sel)) S.sel=(rs.find(r=>r.years[S.year])||rs[0]||{}).id;
+  const q=S.q.toLowerCase();
+  const list=rs.filter(r=>(!q||r.name.toLowerCase().includes(q))&&(S.filter==='all'||(S.filter==='year'&&r.years[S.year])||(S.filter==='frz'&&r.freezable)||(S.filter==='made'&&Object.values(r.years).includes('m'))));
+  const yrs=allYears().slice().reverse().filter(y=>y!==CUR_YEAR||true);
+  const side=`<aside class="side">
+    <input type="text" id="q" placeholder="Search ${rs.length} recipes" value="${esc(S.q)}" aria-label="Search recipes">
+    <div class="filters">${[['all','All'],['year','In '+S.year],['made','Made before'],['frz','Freezable']].map(([k,l])=>`<button class="chip${S.filter===k?' made':''}" data-act="filter" data-f="${k}">${esc(l)}</button>`).join('')}</div>
+    <ul>${list.map(r=>`<li><button data-act="sel" data-id="${esc(r.id)}" aria-current="${r.id===S.sel}"><span>${esc(r.name)}</span><span class="dots" title="Years made">${Object.keys(r.years).sort().slice(-6).map(y=>`<i class="dot ${r.years[y]==='m'?'m':''}"></i>`).join('')}</span></button></li>`).join('')||'<li class="muted" style="padding:8px">No matches</li>'}</ul>
+  </aside>`;
+  const r=rs.find(x=>x.id===S.sel);
+  return `<div class="book">${side}<section class="card">${r?(S.edit?editRecipe(r):showRecipe(r)):'<p>No recipes yet.</p>'}</section></div>`;
+}
+function scaleOf(r){ return S.scale[r.id]||mult(r.id)||1; }
+function showRecipe(r){
+  const sc=scaleOf(r); const cat=catalog(); const inPlan=!!r.years[S.year];
+  const pu=photoUrl(r);
+  const ing=(r.ing||[]).map(i=>{const c=cat[i.k]||{label:i.k,unit:''}; return `<tr><td>${esc(c.label)}</td><td class="q">${esc(friendlyVol(i.q*sc,c.unit))}</td></tr>`}).join('');
+  const baseYield=parseFloat(r.yield);
+  return `<div class="rhead">
+    <div class="photo">${pu?`<img src="${esc(pu)}" alt="${esc(r.name)}">`:`<span>No photo yet</span>`}
+      ${S.assets?`<label class="btn small" for="photoin">${pu?'Change':'Add'} photo</label><input type="file" id="photoin" accept="image/*" class="hidden">`:''}</div>
+    <div>
+      <h2>${esc(r.name)}</h2>
+      ${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noopener">Open the original recipe ↗</a>`:'<span class="muted">No recipe link saved</span>'}
+      <div class="facts">${facts(r)}</div>
+      <div class="yearrow"><span class="muted" style="font-size:.85rem">Years:</span>${yearChips(r,true)||'<span class="muted">none yet</span>'}</div>
+      <div class="yearrow">
+        <button class="btn small ${inPlan?'':'primary'}" data-act="toggleplan" data-id="${esc(r.id)}">${inPlan?'Remove from '+esc(S.year):'Add to '+esc(S.year)}</button>
+        ${inPlan&&r.years[S.year]!=='m'?`<button class="btn small" data-act="markmade" data-id="${esc(r.id)}">Mark made in ${esc(S.year)}</button>`:''}
+        <button class="btn small" data-act="edit">Edit recipe</button>
+      </div>
+    </div></div>
+    <div class="scale">
+      <b>Batch size</b>
+      ${[0.5,1,1.5,2,3].map(x=>`<button class="chip${Math.abs(sc-x)<1e-9?' made':''}" data-act="scale" data-id="${esc(r.id)}" data-x="${x}">${x}×</button>`).join('')}
+      <label for="scx" class="muted">or</label><input type="number" id="scx" step="0.25" min="0.25" value="${+sc.toFixed(3)}" data-id="${esc(r.id)}" aria-label="Batch multiplier">×
+      ${baseYield?`<span class="muted">→ about <b class="num">${Math.round(baseYield*sc)}</b> pieces</span>
+      <label for="scy" class="muted">Want</label><input type="number" id="scy" min="1" placeholder="${Math.round(baseYield*sc)}" data-id="${esc(r.id)}" data-base="${baseYield}" aria-label="Target number of cookies"><span class="muted">cookies</span>`:''}
+      ${inPlan?`<button class="btn small" data-act="scaletoplan" data-id="${esc(r.id)}">Use ${+sc.toFixed(2)}× for ${esc(S.year)} shopping</button>`:''}
+    </div>
+    <div class="cols">
+      <div>
+        <h3 class="section-h">Ingredients ${sc!==1?`<span class="muted" style="font-size:.85rem">(${+sc.toFixed(2)}× the saved amounts)</span>`:''}</h3>
+        ${ing?`<table><tbody>${ing}</tbody></table>`:'<p class="muted">No ingredients entered yet. Use Edit recipe to add them.</p>'}
+        ${(r.siteIng&&r.siteIng.length)?`<details><summary>Original ingredient list${r.siteYield?' ('+esc(r.siteYield)+')':''}</summary><ul>${r.siteIng.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></details>`:''}
+      </div>
+      <div>
+        <h3 class="section-h">Instructions</h3>
+        ${(r.steps&&r.steps.length)?`<ol class="steps">${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol><p class="muted" style="font-size:.82rem">Check the original recipe, if you have one, for full detail.</p>`:'<p class="muted">No instructions saved. Use Edit recipe to paste them in.</p>'}
+        <div class="notes"><h3 class="section-h"><label for="notes">Notes</label></h3><textarea id="notes" data-id="${esc(r.id)}" placeholder="What worked, what to change next year…">${esc(r.notes||'')}</textarea></div>
+      </div>
+    </div>`;
+}
+function editRecipe(r){
+  const cat=catalog(); const keys=Object.keys(cat).sort((a,b)=>cat[a].label.localeCompare(cat[b].label));
+  const opts=k=>keys.map(x=>`<option value="${x}"${x===k?' selected':''}>${esc(cat[x].label)} (${esc(cat[x].unit)})</option>`).join('');
+  return `<h2 style="margin-bottom:12px">Edit: ${esc(r.name)}</h2>
+  <div class="editgrid">
+    <label>Name<input type="text" id="e-name" value="${esc(r.name)}"></label>
+    <label>Recipe link<input type="url" id="e-url" value="${esc(r.url||'')}"></label>
+    <label>Makes (pieces)<input type="number" id="e-yield" value="${esc(r.yield??'')}"></label>
+    <label>Chill (hours)<input type="text" id="e-chill" value="${esc(r.chill||'')}" placeholder="e.g. 1-2"></label>
+    <label>Bake (minutes)<input type="text" id="e-cook" value="${esc(r.cook||'')}" placeholder="e.g. 10-12"></label>
+    <label>Oven °F<input type="number" id="e-temp" value="${esc(r.temp??'')}"></label>
+    <label>Type<select id="e-kind">${[['bake','Baked cookie'],['nobake','No-bake'],['candy','Candy'],['icing','Icing / frosting']].map(([k,l])=>`<option value="${k}"${r.kind===k?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label style="flex-direction:row;align-items:center;gap:8px;margin-top:22px"><input type="checkbox" id="e-frz"${r.freezable?' checked':''}> Freezes well</label>
+  </div>
+  <h3 class="section-h">Shopping ingredients (amounts for 1× batch)</h3>
+  <table class="ingedit"><thead><tr><th>Ingredient</th><th style="width:110px">Amount</th><th style="width:40px"></th></tr></thead><tbody id="e-ing">
+  ${(r.ing||[]).map((i,n)=>`<tr><td><select data-n="${n}" class="e-k">${opts(i.k)}</select></td><td><input type="number" step="any" class="e-q" value="${i.q}"></td><td><button class="btn small danger" data-act="delrow" title="Remove">✕</button></td></tr>`).join('')}
+  </tbody></table>
+  <div class="extras"><button class="btn small" data-act="addrow">+ Ingredient</button>
+    <input type="text" id="newing" placeholder="New ingredient name"><select id="newingu">${['C','tsp','tbsp','oz','g','ea','pkg','can'].map(u=>`<option>${u}</option>`).join('')}</select><button class="btn small" data-act="newing">Add to ingredient list</button></div>
+  <h3 class="section-h"><label for="e-steps">Instructions (one step per line)</label></h3>
+  <textarea id="e-steps" style="min-height:160px">${esc((r.steps||[]).join('\n'))}</textarea>
+  <h3 class="section-h"><label for="e-site">Original ingredient list (one per line, reference only)</label></h3>
+  <textarea id="e-site">${esc((r.siteIng||[]).join('\n'))}</textarea>
+  <div class="extras" style="margin-top:16px"><button class="btn primary" data-act="saveedit" data-id="${esc(r.id)}">Save changes</button><button class="btn" data-act="canceledit">Cancel</button><span style="flex:1"></span><button class="btn danger" data-act="delrecipe" data-id="${esc(r.id)}">Remove from recipe book</button></div>
+  <template id="rowtpl"><tr><td><select class="e-k">${opts('flour')}</select></td><td><input type="number" step="any" class="e-q" value="1"></td><td><button class="btn small danger" data-act="delrow">✕</button></td></tr></template>`;
+}
+
+/* ----- Bake plan ----- */
+function suggestOrder(rs){
+  const info=rs.map(r=>({r,ch:hours(r.chill),t:+r.temp||0,keys:new Set((r.ing||[]).map(i=>i.k))}));
+  const phase=x=>{ if(x.r.kind==='icing') return 4; if(x.r.kind==='nobake'||x.r.kind==='candy') return 3; if(x.r.freezable) return 0; if(x.ch>=2) return 1; return 2; };
+  const groups=[[],[],[],[],[]]; info.forEach(x=>groups[phase(x)].push(x));
+  const sim=(a,b)=>{let n=0;a.keys.forEach(k=>{if(b.keys.has(k)&&!['flour','sugar','butter','eggs','vanilla','bp','bs'].includes(k))n++});return n};
+  const chain=arr=>{ if(arr.length<2) return arr; const out=[arr.shift()]; while(arr.length){const last=out[out.length-1]; arr.sort((a,b)=>(b.t===last.t)-(a.t===last.t)||sim(b,last)-sim(a,last)||b.ch-a.ch); out.push(arr.shift())} return out; };
+  groups[0].sort((a,b)=>b.ch-a.ch||b.t-a.t); groups[1].sort((a,b)=>b.ch-a.ch||b.t-a.t); groups[2].sort((a,b)=>b.t-a.t);
+  const ordered=[...chain(groups[0]),...chain(groups[1]),...chain(groups[2]),...groups[3],...groups[4]];
+  const why={};
+  ordered.forEach((x,i)=>{ const p=phase(x); const prev=ordered[i-1]; const bits=[];
+    bits.push(['Make ahead and freeze','Long chill: mix dough a day early','Bake fresh, grouped by oven temp','No oven needed: do while things bake or at the end','Make icing when you are ready to decorate'][p]);
+    if(prev&&x.t&&prev.t===x.t&&p<3) bits.push('same oven temp as the one before');
+    if(prev){const s=[...x.keys].filter(k=>prev.keys.has(k)&&!['flour','sugar','butter','eggs','vanilla','bp','bs'].includes(k)).map(k=>(catalog()[k]||{}).label).filter(Boolean); if(s.length) bits.push('shares '+s.slice(0,2).join(', ').toLowerCase()+' with the one before');}
+    why[x.r.id]={phase:p,text:bits.join(' · ')}; });
+  return {order:ordered.map(x=>x.r.id),why};
+}
+function orderedPlan(){
+  const rs=planRecipes(); const p=plan(); const sug=suggestOrder(rs.slice());
+  let ord=(p.order||[]).filter(id=>rs.find(r=>r.id===id));
+  const missing=sug.order.filter(id=>!ord.includes(id));
+  if(!ord.length) ord=sug.order; else ord=ord.concat(missing);
+  return {list:ord.map(id=>rs.find(r=>r.id===id)),why:sug.why,custom:!!(p.order&&p.order.length)};
+}
+function viewPlan(){
+  const rs=recipes(); const {list,why,custom}=orderedPlan(); const p=plan();
+  const totals={n:list.length,pieces:list.reduce((a,r)=>a+(parseFloat(r.yield)||0)*mult(r.id),0),frz:list.filter(r=>r.freezable).length,done:list.filter(r=>status(r.id)==='done'||r.years[S.year]==='m').length};
+  const ST=[['todo','Not started'],['dough','Dough made'],['baked','Baked'],['done','Done']];
+  const rows=list.map((r,i)=>`<li class="prow" draggable="true" data-id="${esc(r.id)}" data-status="${status(r.id)}">
+      <span class="grip" title="Drag to reorder" aria-hidden="true">⋮⋮</span>
+      <span class="pnum">${i+1}</span>
+      <div><div class="pname"><button data-act="open" data-id="${esc(r.id)}">${esc(r.name)}</button> ${r.years[S.year]==='m'?'<span class="chip made">made ✓</span>':''}</div>
+        <div class="facts" style="margin:4px 0">${facts(r)}</div>
+        <div class="why">${esc((why[r.id]||{}).text||'')}</div></div>
+      <div class="pctl">
+        <label class="muted" for="m-${esc(r.id)}" style="font-size:.8rem">Batch</label><input type="number" id="m-${esc(r.id)}" step="0.5" min="0.5" value="${mult(r.id)}" data-act="mult" data-id="${esc(r.id)}">
+        <select data-act="status" data-id="${esc(r.id)}" aria-label="Status">${ST.map(([k,l])=>`<option value="${k}"${status(r.id)===k?' selected':''}>${l}</option>`).join('')}</select>
+        <button class="btn small" data-act="up" data-id="${esc(r.id)}" aria-label="Move up"${i===0?' disabled':''}>↑</button>
+        <button class="btn small" data-act="down" data-id="${esc(r.id)}" aria-label="Move down"${i===list.length-1?' disabled':''}>↓</button>
+      </div></li>`).join('');
+  const picker=rs.map(r=>{const past=Object.keys(r.years).filter(y=>y!==S.year&&r.years[y]==='m').sort();
+    return `<label><input type="checkbox" data-act="pick" data-id="${esc(r.id)}"${r.years[S.year]?' checked':''}> ${esc(r.name)}<span class="past">${past.length?'made '+past.map(y=>y.slice(0,4).replace(/^20/,"'")).join(' '):'new'}</span></label>`}).join('');
+  const hist=allYears().filter(y=>y!==S.year).map(y=>{const made=rs.filter(r=>r.years[y]==='m'); const other=rs.filter(r=>r.years[y]&&r.years[y]!=='m');
+    if(!made.length&&!other.length) return '';
+    return `<div class="yr"><b>${esc(y)}</b><div class="list">${made.map(r=>`<button class="chip made" data-act="open" data-id="${esc(r.id)}">${esc(r.name)}</button>`).join('')}${other.map(r=>`<button class="chip ${r.years[y]==='h'?'odd':'planned'}" data-act="open" data-id="${esc(r.id)}" title="${STATE_LABEL[r.years[y]]}">${esc(r.name)}</button>`).join('')}</div></div>`}).join('');
+  return `<div class="summary">
+      <div class="tile"><b class="num">${totals.n}</b><span>cookies planned for ${esc(S.year)}</span></div>
+      <div class="tile"><b class="num">≈${Math.round(totals.pieces)}</b><span>pieces at these batch sizes</span></div>
+      <div class="tile"><b class="num">${totals.frz}</b><span>can be made ahead &amp; frozen</span></div>
+      <div class="tile"><b class="num">${totals.done}/${totals.n}</b><span>done</span></div></div>
+    <div class="plan"><section>
+      <div class="shopbar"><h2 style="font-size:1.4rem">${esc(S.year)} bake order</h2><span style="flex:1"></span>
+        <button class="btn" data-act="suggest">${custom?'Re-suggest order':'Save suggested order'}</button></div>
+      ${S.confirmOrder?`<div class="confirmbar">Replace your current order with the suggested one? <button class="btn small primary" data-act="suggestyes">Replace</button><button class="btn small" data-act="suggestno">Keep mine</button></div>`:''}
+      <p class="muted" style="margin-top:0;font-size:.9rem">${custom?'This is your saved order. Drag rows or use the arrows as real life happens.':'Suggested: freezable cookies first, long-chill doughs next, then fresh bakes grouped by oven temperature and shared ingredients, no-bake treats and icing last. Drag to change it.'}</p>
+      ${list.length?`<ol class="planlist" id="planlist">${rows}</ol>`:`<div class="banner">Nothing planned for ${esc(S.year)} yet. Tick cookies in the list on the right to add them.</div>`}
+      <h2 style="font-size:1.25rem;margin:26px 0 10px">Cookies by year</h2>
+      <div class="history">${hist||'<p class="muted">No past years.</p>'}</div>
+      <p class="muted" style="font-size:.82rem">Solid chips were made that year. Dashed chips were on the list but not made. Gold chips are marked unclear.</p>
+    </section>
+    <aside class="card" style="padding:14px"><h3 style="font-size:1.05rem;margin-bottom:6px">Choose cookies for ${esc(S.year)}</h3>
+      <p class="muted" style="font-size:.85rem;margin:0 0 8px">Ticking adds the ${esc(S.year)} tag. It drives the bake order and the shopping list.</p>
+      <div class="picker">${picker}</div></aside></div>`;
+}
+
+/* ----- Shopping ----- */
+function shopping(){
+  const cat=catalog(); const rows={};
+  planRecipes().forEach(r=>{ const m=mult(r.id); (r.ing||[]).forEach(i=>{ const c=cat[i.k]||{label:i.k,unit:'',cat:'Other'};
+    const row=rows[i.k]||(rows[i.k]={k:i.k,label:c.label,unit:c.unit,cat:c.cat||'Other',total:0,uses:[]});
+    row.total+=i.q*m; row.uses.push(r.name); }); });
+  const p=plan();
+  return Object.values(rows).map(x=>{ const pk=pkgOf(x.k); x.pkg=pk.size; x.pkgLabel=pk.label; x.buy=pk.size?Math.ceil(x.total/pk.size-1e-9):null; x.need=p.need&&p.need[x.k]===false?false:true; x.got=!!(p.got&&p.got[x.k]); return x; })
+    .sort((a,b)=>a.label.localeCompare(b.label));
+}
+function viewShop(){
+  const rows=shopping(); const p=plan(); const needRows=rows.filter(r=>r.need); const extras=p.extras||[];
+  if(!planRecipes().length) return `<div class="banner">No cookies are tagged for ${esc(S.year)} yet. Pick them on the Bake plan tab and the shopping list fills in.</div>`;
+  const bar=`<div class="shopbar noprint"><h2 style="font-size:1.4rem">${esc(S.year)} shopping</h2>
+    <span class="muted">${planRecipes().length} cookies · ${needRows.length} of ${rows.length} ingredients to buy</span><span style="flex:1"></span>
+    <button class="btn${S.shopView==='table'?' primary':''}" data-act="shopview" data-v="table">Plan the list</button>
+    <button class="btn${S.shopView==='clean'?' primary':''}" data-act="shopview" data-v="clean">Shopping view</button></div>`;
+  if(S.shopView==='clean'){
+    const groups={}; needRows.forEach(r=>(groups[r.cat]=groups[r.cat]||[]).push(r));
+    const left=needRows.filter(r=>!r.got).length+extras.filter(e=>!e.got).length;
+    return bar+`<div class="clean"><div class="shopbar"><h2 style="font-size:1.3rem">Cookie shopping · ${esc(S.year)}</h2><span style="flex:1"></span><span class="muted num">${left} left</span></div>
+      ${Object.keys(groups).sort().map(g=>`<h3>${esc(g)}</h3><ul>${groups[g].map(r=>`<li class="${r.got?'got':''}"><label><input type="checkbox" data-act="got" data-k="${esc(r.k)}"${r.got?' checked':''}><span class="t">${esc(r.label)}</span><span class="amt">${r.buy!=null?`${r.buy} × ${esc(r.pkgLabel||'pkg')}`:esc(friendlyVol(r.total,r.unit))}</span></label></li>`).join('')}</ul>`).join('')}
+      ${extras.length?`<h3>Extras</h3><ul>${extras.map((e,n)=>`<li class="${e.got?'got':''}"><label><input type="checkbox" data-act="gotx" data-n="${n}"${e.got?' checked':''}><span class="t">${esc(e.label)}</span></label></li>`).join('')}</ul>`:''}
+      <div class="extras noprint" style="margin-top:18px"><button class="btn" data-act="copylist">Copy list as text</button><button class="btn" data-act="cleargot">Uncheck everything</button></div>
+    </div>`;
+  }
+  const t=rows.map(r=>`<tr class="${r.need?'':'skip'}"><td class="name"><b>${esc(r.label)}</b><div class="uses">${esc(r.uses.join(', '))}</div></td>
+      <td class="q">${esc(friendlyVol(r.total,r.unit))}</td>
+      <td><input type="number" step="any" min="0" value="${r.pkg??''}" data-act="pkg" data-k="${esc(r.k)}" aria-label="Amount per package in ${esc(r.unit)}" placeholder="—"> <span class="muted" style="font-size:.8rem">${esc(UNIT_LABEL[r.unit]??r.unit)}</span>
+        <input type="text" value="${esc(r.pkgLabel||'')}" data-act="pkglabel" data-k="${esc(r.k)}" placeholder="e.g. 5 lb bag" aria-label="Package name" style="width:110px"></td>
+      <td class="q">${r.buy!=null?r.buy:'—'}</td>
+      <td><button class="tog ${r.need?'yes':''}" data-act="need" data-k="${esc(r.k)}" aria-pressed="${r.need}">${r.need?'Buy':'Have it'}</button></td></tr>`).join('');
+  return bar+`<p class="muted" style="margin-top:0;font-size:.9rem">Totals add up every cookie tagged ${esc(S.year)} at its batch size. Set "Have it" for anything already in the pantry; only "Buy" items go to the shopping view. Package sizes are saved once and apply to every year.</p>
+    <div style="overflow-x:auto" class="card" ><table class="shop"><thead><tr><th>Ingredient</th><th style="text-align:right">Total needed</th><th>Package size</th><th style="text-align:right">Packages</th><th>Need to buy?</th></tr></thead><tbody>${t}</tbody></table></div>
+    <div class="extras"><input type="text" id="xlabel" placeholder="Add something else (sprinkles, tins, parchment…)" style="flex:1;min-width:220px"><button class="btn" data-act="addx">Add to list</button></div>
+    ${extras.length?`<div class="extras">${extras.map((e,n)=>`<span class="chip">${esc(e.label)} <button class="btn small danger" style="border:0;padding:0 4px" data-act="delx" data-n="${n}" aria-label="Remove">✕</button></span>`).join('')}</div>`:''}`;
+}
+
+/* ----- Add ----- */
+function viewAdd(){
+  return `<section class="card addform">
+    <h2>Add a recipe to the book</h2>
+    <p class="muted" style="margin:0">Fill in what you know. Paste the recipe text and, where available, let Claude fill in the details and map the ingredients onto your shopping list.</p>
+    <div class="two"><label class="field">Cookie name<input type="text" id="a-name" placeholder="e.g. Brown Butter Snickerdoodles"></label>
+      <label class="field">Recipe link<input type="url" id="a-url" placeholder="https://…"></label></div>
+    <label class="field">Recipe text (optional: copy the ingredients and steps from the page)<textarea id="a-text" style="min-height:180px" placeholder="Paste the ingredients and instructions here"></textarea></label>
+    <label class="field">Notes<textarea id="a-notes" placeholder="Why you want to try it, changes you plan…"></textarea></label>
+    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="a-plan" checked> Add it to ${esc(S.year)}</label>
+    <div class="extras">
+      ${S.sample?`<button class="btn primary" data-act="addai">Fill in with Claude and save</button>`:''}
+      <button class="btn${S.sample?'':' primary'}" data-act="addplain">Save as is</button>
+      <span class="muted" id="a-status"></span></div>
+    <p class="muted" style="font-size:.85rem;margin:0">This page can't open other websites itself, so paste the recipe text here. Only add recipes you have the right to use.</p>
+  </section>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',async e=>{
+  const tab=e.target.closest('nav.tabs button'); if(tab){S.tab=tab.dataset.tab;S.edit=false;try{localStorage.setItem('ck_tab',S.tab)}catch(_){} history.replaceState(null,'','#'+S.tab); render(); window.scrollTo(0,0); return;}
+  const b=e.target.closest('[data-act]'); if(!b||b.tagName==='INPUT'||b.tagName==='SELECT') return;
+  const a=b.dataset.act, id=b.dataset.id;
+  if(a==='sel'){S.sel=id;S.edit=false;render();if(innerWidth<900)$('.card').scrollIntoView();}
+  else if(a==='open'){S.sel=id;S.tab='book';S.edit=false;render();window.scrollTo(0,0);}
+  else if(a==='filter'){S.filter=b.dataset.f;render();}
+  else if(a==='cycleyear'){const r=rec(id),y=b.dataset.y,cur=r.years[y];const nx={m:'p',p:null,h:'m'}[cur]; setYearTag(id,y,nx===undefined?'m':nx); render();}
+  else if(a==='toggleplan'){const r=rec(id); setYearTag(id,S.year,r.years[S.year]?null:'p'); render();}
+  else if(a==='markmade'){setYearTag(id,S.year,'m'); setPlan(p=>{p.items[id]=Object.assign({},p.items[id],{status:'done'})}); render();}
+  else if(a==='scale'){S.scale[id]=+b.dataset.x;render();}
+  else if(a==='scaletoplan'){const sc=scaleOf(rec(id)); setPlan(p=>{p.items[id]=Object.assign({},p.items[id],{mult:sc})}); toast(`${S.year} shopping now uses ${+sc.toFixed(2)}×`); render();}
+  else if(a==='edit'){S.edit=true;render();}
+  else if(a==='canceledit'){S.edit=false;render();}
+  else if(a==='addrow'){ $('#e-ing').appendChild($('#rowtpl').content.cloneNode(true)); }
+  else if(a==='delrow'){ b.closest('tr').remove(); }
+  else if(a==='newing'){ const name=$('#newing').value.trim(); if(!name) return; const unit=$('#newingu').value; const k='x-'+slug(name);
+      setSettings(s=>{s.catalog=s.catalog||{}; s.catalog[k]={label:name,unit,cat:'Other',pkg:null,pkgLabel:''};});
+      const tr=$('#rowtpl').content.cloneNode(true); const sel=tr.querySelector('select'); sel.insertAdjacentHTML('beforeend',`<option value="${k}" selected>${esc(name)} (${unit})</option>`); $('#e-ing').appendChild(tr); $('#newing').value=''; }
+  else if(a==='saveedit'){ saveEdit(id); }
+  else if(a==='delrecipe'){ if(b.dataset.sure){ setOver(id,{deleted:true}); S.edit=false; S.sel=null; render(); toast('Removed from the recipe book'); } else { b.dataset.sure='1'; b.textContent='Click again to remove'; } }
+  else if(a==='up'||a==='down'){ move(id,a==='up'?-1:1); }
+  else if(a==='suggest'){ if(plan().order&&plan().order.length){S.confirmOrder=true;render();} else { const s=suggestOrder(planRecipes()); setPlan(p=>p.order=s.order); render(); toast('Order saved'); } }
+  else if(a==='suggestyes'){ const s=suggestOrder(planRecipes()); setPlan(p=>p.order=s.order); S.confirmOrder=false; render(); }
+  else if(a==='suggestno'){ S.confirmOrder=false; render(); }
+  else if(a==='shopview'){ S.shopView=b.dataset.v; render(); }
+  else if(a==='need'){ const k=b.dataset.k; setPlan(p=>{ p.need[k]=p.need[k]===false?true:false; }); render(); }
+  else if(a==='addx'){ const v=$('#xlabel').value.trim(); if(!v) return; setPlan(p=>p.extras.push({label:v,got:false})); render(); }
+  else if(a==='delx'){ const n=+b.dataset.n; setPlan(p=>p.extras.splice(n,1)); render(); }
+  else if(a==='cleargot'){ setPlan(p=>{p.got={}; p.extras.forEach(x=>x.got=false)}); render(); }
+  else if(a==='copylist'){ copyList(); }
+  else if(a==='addplain'){ addRecipe(false); }
+  else if(a==='addai'){ addRecipe(true); }
+});
+document.addEventListener('change',async e=>{
+  const t=e.target; const a=t.dataset.act;
+  if(t.id==='year'){ S.year=t.value; try{localStorage.setItem('ck_year',S.year)}catch(_){} render(); return; }
+  if(t.id==='photoin'&&t.files[0]){ uploadPhoto(S.sel,t.files[0]); return; }
+  if(a==='pick'){ setYearTag(t.dataset.id,S.year,t.checked?'p':null); render(); }
+  else if(a==='mult'){ const v=Math.max(0.25,parseFloat(t.value)||1); setPlan(p=>{p.items[t.dataset.id]=Object.assign({},p.items[t.dataset.id],{mult:v})}); render(); }
+  else if(a==='status'){ const id=t.dataset.id,v=t.value; setPlan(p=>{p.items[id]=Object.assign({},p.items[id],{status:v})}); if(v==='done') setYearTag(id,S.year,'m'); else if(rec(id).years[S.year]==='m') setYearTag(id,S.year,'p'); render(); }
+  else if(a==='pkg'){ const k=t.dataset.k, v=t.value===''?null:parseFloat(t.value); setSettings(s=>{s.pkg=s.pkg||{}; s.pkg[k]=Object.assign({},s.pkg[k],{size:v})}); render(); }
+  else if(a==='pkglabel'){ const k=t.dataset.k; setSettings(s=>{s.pkg=s.pkg||{}; s.pkg[k]=Object.assign({},s.pkg[k],{label:t.value})}); render(); }
+  else if(a==='got'){ const k=t.dataset.k; setPlan(p=>{p.got[k]=t.checked}); render(); }
+  else if(a==='gotx'){ const n=+t.dataset.n; setPlan(p=>{p.extras[n].got=t.checked}); render(); }
+  else if(t.id==='scx'){ S.scale[t.dataset.id]=Math.max(0.25,parseFloat(t.value)||1); render(); }
+  else if(t.id==='scy'){ const v=parseFloat(t.value); if(v>0){ S.scale[t.dataset.id]=Math.round(v/parseFloat(t.dataset.base)*100)/100; render(); } }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='q'){S.q=t.value;render();}
+  else if(t.id==='notes'){ const id=t.dataset.id; S.over[id]=Object.assign({},S.over[id],{notes:t.value}); saveDoc('recipes/'+id,()=>S.over[id]); }
+});
+$('#newyear').addEventListener('click',()=>{
+  const m=$('#main'); if($('#nybar')) return;
+  m.insertAdjacentHTML('afterbegin',`<div class="confirmbar" id="nybar"><label for="nyv">New year or event</label><input type="text" id="nyv" value="${String(+CUR_YEAR+ (allYears().includes(CUR_YEAR)&&planRecipes(CUR_YEAR).length?1:0))}"><button class="btn small primary" id="nyok">Start it</button><button class="btn small" id="nyno">Cancel</button></div>`);
+  $('#nyok').onclick=()=>{const v=$('#nyv').value.trim(); if(!v) return; setSettings(s=>{s.years=Array.from(new Set([...(s.years||[]),v]))}); S.year=v; S.tab='plan'; render();};
+  $('#nyno').onclick=()=>$('#nybar').remove();
+});
+
+function move(id,d){ const {list}=orderedPlan(); const ids=list.map(r=>r.id); const i=ids.indexOf(id), j=i+d; if(j<0||j>=ids.length) return; [ids[i],ids[j]]=[ids[j],ids[i]]; setPlan(p=>p.order=ids); render(); }
+function wireDnD(){
+  const ol=$('#planlist'); if(!ol) return; let drag=null;
+  ol.querySelectorAll('.prow').forEach(li=>{
+    li.addEventListener('dragstart',e=>{drag=li.dataset.id;li.classList.add('dragging');e.dataTransfer.effectAllowed='move';try{e.dataTransfer.setData('text/plain',drag)}catch(_){}});
+    li.addEventListener('dragend',()=>li.classList.remove('dragging'));
+    li.addEventListener('dragover',e=>{e.preventDefault();li.classList.add('over')});
+    li.addEventListener('dragleave',()=>li.classList.remove('over'));
+    li.addEventListener('drop',e=>{e.preventDefault();li.classList.remove('over'); const to=li.dataset.id; if(!drag||drag===to) return;
+      const ids=orderedPlan().list.map(r=>r.id); ids.splice(ids.indexOf(drag),1); ids.splice(ids.indexOf(to)+(e.offsetY>li.offsetHeight/2?1:0),0,drag); setPlan(p=>p.order=ids); render();});
+  });
+}
+function saveEdit(id){
+  const ing=[...document.querySelectorAll('#e-ing tr')].map(tr=>({k:tr.querySelector('.e-k').value,q:parseFloat(tr.querySelector('.e-q').value)})).filter(i=>i.k&&i.q>0);
+  const num=v=>v===''?null:+v;
+  setOver(id,{name:$('#e-name').value.trim()||rec(id).name,url:$('#e-url').value.trim(),yield:num($('#e-yield').value),chill:$('#e-chill').value.trim(),cook:$('#e-cook').value.trim(),
+    temp:num($('#e-temp').value),kind:$('#e-kind').value,freezable:$('#e-frz').checked,ing,
+    steps:$('#e-steps').value.split('\n').map(s=>s.trim()).filter(Boolean),siteIng:$('#e-site').value.split('\n').map(s=>s.trim()).filter(Boolean)});
+  S.edit=false; render(); toast('Recipe saved');
+}
+async function uploadPhoto(id,file){
+  if(!S.assets){toast('Photo uploads need edit access.');return}
+  try{ setSync('Uploading photo…');
+    const blob=await shrink(file); const res=await S.assets.upload(blob);
+    setOver(id,{photoId:res.id}); render(); setSync('Saved');
+  }catch(e){ toast('Photo upload failed: '+(e&&e.message||'try a smaller image')); setSync('Not saved',true); }
+}
+function shrink(file){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const s=Math.min(1,1200/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=img.width*s; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,c.width,c.height); c.toBlob(b=>res(b||file),'image/jpeg',0.85); }; img.onerror=()=>res(file); img.src=URL.createObjectURL(file); }); }
+async function copyList(){
+  const rows=shopping().filter(r=>r.need&&!r.got); const ex=(plan().extras||[]).filter(e=>!e.got);
+  const txt=`Cookie shopping ${S.year}\n`+rows.map(r=>`☐ ${r.label}: ${r.buy!=null?r.buy+' × '+(r.pkgLabel||'pkg')+' ('+friendlyVol(r.total,r.unit)+')':friendlyVol(r.total,r.unit)}`).join('\n')+(ex.length?'\n'+ex.map(e=>'☐ '+e.label).join('\n'):'');
+  try{ await navigator.clipboard.writeText(txt); toast('Copied. Paste it into a note or text message.'); }catch(e){ toast('Copy was blocked by the browser.'); }
+}
+async function addRecipe(useAI){
+  const name=$('#a-name').value.trim(), url=$('#a-url').value.trim(), text=$('#a-text').value.trim(), notes=$('#a-notes').value.trim();
+  if(!name&&!text){ $('#a-status').textContent='Give it a name or paste the recipe text.'; return; }
+  let r={name:name||'New recipe',url,notes,custom:true,ing:[],steps:[],siteIng:[],kind:'bake',freezable:false,years:{}};
+  if(useAI&&S.sample&&text){
+    $('#a-status').textContent='Claude is reading the recipe…';
+    const cat=catalog(); const keys=Object.keys(cat).map(k=>`${k}=${cat[k].label} [${cat[k].unit}]`).join('; ');
+    const prompt=`You turn a pasted cookie recipe into JSON for a baker's tracker. Return ONLY a JSON object with keys:
+name (string), yield (number of pieces or null), chill (hours as text like "1" or "1-2", "" if none), cook (minutes as text like "10-12"), temp (oven °F number or null), freezable (boolean; true if the recipe says the dough or cookies freeze well), kind ("bake","nobake","candy" or "icing"),
+siteIng (array of the ingredient lines as written), steps (array of 4-8 short steps in your own words, keeping temps and times),
+ing (array of {k,q} mapping each ingredient onto this pantry list, with q converted to the unit in brackets; skip salt and water; use k="new:<Label>|<unit>" when nothing fits). Units: C=cups, tbsp, tsp, oz, g, ea=each.
+Pantry list: ${keys}
+Name given by the baker: ${name||'(none)'}
+Recipe text:
+${text.slice(0,12000)}`;
+    try{
+      const out=await S.sample.json(prompt,{modelTier:'default'});
+      const o=(out&&typeof out==='object')?out:JSON.parse(String(out));
+      const newCat={}; const ing=[];
+      (o.ing||[]).forEach(i=>{ let k=String(i.k||''); const q=parseFloat(i.q); if(!(q>0)) return;
+        if(k.startsWith('new:')){ const [lab,unit]=k.slice(4).split('|'); k='x-'+slug(lab); newCat[k]={label:lab,unit:unit||'ea',cat:'Other',pkg:null,pkgLabel:''}; }
+        if(cat[k]||newCat[k]) ing.push({k,q}); });
+      if(Object.keys(newCat).length) setSettings(s=>{s.catalog=Object.assign({},s.catalog||{},newCat)});
+      r=Object.assign(r,{name:name||o.name||r.name,yield:+o.yield||null,chill:o.chill||'',cook:o.cook||'',temp:+o.temp||null,freezable:!!o.freezable,kind:o.kind||'bake',siteIng:o.siteIng||[],steps:o.steps||[],ing});
+    }catch(e){
+      $('#a-status').textContent=e&&e.code==='not_granted'?'Claude is not available on this page; saved without it.':'Claude could not read that text; saved it as notes instead.';
+      r.notes=(notes?notes+'\n\n':'')+text;
+    }
+  } else if(text){ r.notes=(notes?notes+'\n\n':'')+text; }
+  let id=slug(r.name); if(rec(id)) id=id+'-'+Date.now().toString(36).slice(-4);
+  if($('#a-plan').checked) r.years[S.year]='p';
+  S.over[id]=r; saveDoc('recipes/'+id,()=>S.over[id]);
+  S.sel=id; S.tab='book'; S.edit=!useAI||!r.ing.length; render(); toast('Added to the recipe book'+(S.edit?'. Check the ingredients below.':''));
+}
+boot();
+</script>
+</body>
+</html>
