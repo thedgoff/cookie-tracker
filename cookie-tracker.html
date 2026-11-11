@@ -92,6 +92,7 @@ button.chip{cursor:pointer}
 table{border-collapse:collapse;width:100%}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 th{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td.q.wt,.wt{color:var(--muted);font-weight:400;font-size:.88rem;white-space:nowrap}
 td.q{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
 ol.steps{padding-left:22px;margin:8px 0}
 ol.steps li{margin-bottom:8px;max-width:65ch}
@@ -206,7 +207,8 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "almond_flour": {
    "label": "Almond flour",
@@ -220,14 +222,16 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "C",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 240
   },
   "apple_juice": {
    "label": "Apple juice",
    "unit": "tbsp",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 15
   },
   "apples": {
    "label": "Apples",
@@ -241,77 +245,88 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "tsp",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "bs": {
    "label": "Baking soda",
    "unit": "tsp",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 6
   },
   "brown_dark": {
    "label": "Brown sugar (dark)",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 213
   },
   "brown_light": {
    "label": "Brown sugar (light)",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 213
   },
   "butter_salted": {
    "label": "Butter (salted)",
    "unit": "C",
    "cat": "Dairy & eggs",
    "pkg": 2,
-   "pkgLabel": "1 lb box"
+   "pkgLabel": "1 lb box",
+   "g": 227
   },
   "butter": {
    "label": "Butter (unsalted)",
    "unit": "C",
    "cat": "Dairy & eggs",
    "pkg": 2,
-   "pkgLabel": "1 lb box"
+   "pkgLabel": "1 lb box",
+   "g": 227
   },
   "buttermilk": {
    "label": "Buttermilk",
    "unit": "C",
    "cat": "Dairy & eggs",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 227
   },
   "butterscotch": {
    "label": "Butterscotch chips",
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": 2,
-   "pkgLabel": "11 oz bag"
+   "pkgLabel": "11 oz bag",
+   "g": 170
   },
   "candy_cane": {
    "label": "Candy canes",
    "unit": "ea",
    "cat": "Chocolate & candy",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 14
   },
   "cardamom": {
    "label": "Cardamom",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2
   },
   "cheerios": {
    "label": "Cheerios",
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 28
   },
   "choc_bitter": {
    "label": "Chocolate, bittersweet bar",
@@ -339,84 +354,96 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": 2,
-   "pkgLabel": "bag"
+   "pkgLabel": "bag",
+   "g": 170
   },
   "chips_semi": {
    "label": "Chocolate chips (semisweet)",
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": 2,
-   "pkgLabel": "12 oz bag"
+   "pkgLabel": "12 oz bag",
+   "g": 170
   },
   "chips_white": {
    "label": "Chocolate chips (white)",
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": 2,
-   "pkgLabel": "bag"
+   "pkgLabel": "bag",
+   "g": 170
   },
   "cinnamon": {
    "label": "Cinnamon",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2.6
   },
   "cloves": {
    "label": "Cloves",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2.1
   },
   "cocoa": {
    "label": "Cocoa powder",
    "unit": "tbsp",
    "cat": "Baking staples",
    "pkg": 32,
-   "pkgLabel": "8 oz can"
+   "pkgLabel": "8 oz can",
+   "g": 5.3
   },
   "coconut": {
    "label": "Coconut",
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 85
   },
   "condensed": {
    "label": "Sweetened condensed milk",
    "unit": "can",
    "cat": "Dairy & eggs",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 397
   },
   "corn_syrup": {
    "label": "Corn syrup",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 312
   },
   "cornstarch": {
    "label": "Cornstarch",
    "unit": "tbsp",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 7
   },
   "cranberries": {
    "label": "Cranberries (fresh)",
    "unit": "C",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 100
   },
   "cran_dried": {
    "label": "Cranberries (dried)",
    "unit": "C",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 114
   },
   "cream_cheese": {
    "label": "Cream cheese",
@@ -430,7 +457,8 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "tsp",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 3
   },
   "dates": {
    "label": "Dates (pitted)",
@@ -444,70 +472,80 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "ea",
    "cat": "Dairy & eggs",
    "pkg": 12,
-   "pkgLabel": "dozen"
+   "pkgLabel": "dozen",
+   "g": 50
   },
   "egg_whites": {
    "label": "Egg whites",
    "unit": "ea",
    "cat": "Dairy & eggs",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 30
   },
   "espresso": {
    "label": "Espresso powder",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2.3
   },
   "flour": {
    "label": "Flour (all-purpose)",
    "unit": "C",
    "cat": "Baking staples",
    "pkg": 18,
-   "pkgLabel": "5 lb bag"
+   "pkgLabel": "5 lb bag",
+   "g": 120
   },
   "cake_flour": {
    "label": "Flour (cake)",
    "unit": "C",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 120
   },
   "ginger": {
    "label": "Ginger (ground)",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 1.8
   },
   "heavy_cream": {
    "label": "Heavy cream",
    "unit": "C",
    "cat": "Dairy & eggs",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 227
   },
   "honey": {
    "label": "Honey",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 336
   },
   "hc_mix": {
    "label": "Hot chocolate mix",
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 100
   },
   "kisses": {
    "label": "Hershey's Kisses",
    "unit": "ea",
    "cat": "Chocolate & candy",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4.6
   },
   "lemon": {
    "label": "Lemon",
@@ -521,77 +559,88 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "marsh_mini_col": {
    "label": "Marshmallows (mini, colored)",
    "unit": "C",
    "cat": "Chocolate & candy",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 43
   },
   "marshmallows": {
    "label": "Marshmallows (large)",
    "unit": "ea",
    "cat": "Chocolate & candy",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 7
   },
   "meringue": {
    "label": "Meringue powder",
    "unit": "tbsp",
    "cat": "Baking staples",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 9
   },
   "milk": {
    "label": "Milk",
    "unit": "C",
    "cat": "Dairy & eggs",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 227
   },
   "molasses": {
    "label": "Molasses",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 337
   },
   "nonmelt_sugar": {
    "label": "Non-melting topping sugar",
    "unit": "C",
    "cat": "Sugars",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 113
   },
   "nutmeg": {
    "label": "Nutmeg",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2.2
   },
   "allspice": {
    "label": "Allspice",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 1.9
   },
   "olive_oil": {
    "label": "Olive oil",
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 200
   },
   "orange_zest": {
    "label": "Orange zest",
    "unit": "tsp",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 2
   },
   "oreos": {
    "label": "Oreos",
@@ -605,35 +654,40 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 270
   },
   "peanuts": {
    "label": "Peanuts",
    "unit": "C",
    "cat": "Nuts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 142
   },
   "pecans": {
    "label": "Pecans",
    "unit": "C",
    "cat": "Nuts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 113
   },
   "pecan_halves": {
    "label": "Pecan halves",
    "unit": "C",
    "cat": "Nuts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 99
   },
   "peppermint": {
    "label": "Peppermint extract",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "pie_dough": {
    "label": "Pie dough (refrigerated)",
@@ -647,56 +701,64 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "C",
    "cat": "Nuts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 123
   },
   "pps": {
    "label": "Pumpkin pie spice",
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 1.7
   },
   "pumpkin": {
    "label": "Pumpkin puree",
    "unit": "C",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 227
   },
   "rice_krispies": {
    "label": "Rice Krispies",
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 28
   },
   "shortening": {
    "label": "Shortening",
    "unit": "tsp",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "jam": {
    "label": "Strawberry/raspberry jam",
    "unit": "C",
    "cat": "Produce & fruit",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 340
   },
   "powdered": {
    "label": "Sugar (powdered)",
    "unit": "C",
    "cat": "Sugars",
    "pkg": 9,
-   "pkgLabel": "2 lb bag"
+   "pkgLabel": "2 lb bag",
+   "g": 113
   },
   "sugar": {
    "label": "Sugar (granulated)",
    "unit": "C",
    "cat": "Sugars",
    "pkg": 9,
-   "pkgLabel": "4 lb bag"
+   "pkgLabel": "4 lb bag",
+   "g": 198
   },
   "superfine": {
    "label": "Sugar (superfine)",
@@ -710,21 +772,24 @@ details ul{margin:6px 0;padding-left:20px}
    "unit": "tsp",
    "cat": "Spices & extracts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 4
   },
   "veg_oil": {
    "label": "Vegetable oil",
    "unit": "C",
    "cat": "Other",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 198
   },
   "walnuts": {
    "label": "Walnuts",
    "unit": "C",
    "cat": "Nuts",
    "pkg": null,
-   "pkgLabel": ""
+   "pkgLabel": "",
+   "g": 113
   }
  },
  "recipes": []
@@ -780,6 +845,9 @@ function slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').repla
 
 /* ---------- data merge ---------- */
 function catalog(){ return Object.assign({}, S.lib?S.lib.catalog:{}, S.settings.catalog||{}); }
+function gramsPer(k){ const o=(S.settings.pkg||{})[k]||{}; if(o.g!==undefined&&o.g!==null&&o.g!=='') return +o.g; const c=catalog()[k]||{}; return c.g||null; }
+function fmtG(g){ if(!(g>0)) return ''; if(g<10) return (Math.round(g*10)/10)+' g'; if(g<100) return Math.round(g)+' g'; if(g<1000) return Math.round(g/5)*5+' g'; return (Math.round(g/50)*50/1000).toFixed(2).replace(/0$/,'')+' kg'; }
+function wt(k,q){ const c=catalog()[k]||{}; if(c.unit==='g'||c.unit==='oz') return ''; const g=gramsPer(k); return g?fmtG(g*q):''; }
 function pkgOf(k){ const c=catalog()[k]||{}; const o=(S.settings.pkg||{})[k]||{}; return {size: o.size!==undefined?o.size:c.pkg, label: o.label!==undefined?o.label:(c.pkgLabel||'')}; }
 function recipes(){
   const base={}; (S.lib?S.lib.recipes:[]).forEach(r=>base[r.id]=r);
@@ -929,7 +997,7 @@ function scaleOf(r){ return S.scale[r.id]||mult(r.id)||1; }
 function showRecipe(r){
   const sc=scaleOf(r); const cat=catalog(); const inPlan=!!r.years[S.year];
   const pu=photoUrl(r);
-  const ing=(r.ing||[]).map(i=>{const c=cat[i.k]||{label:i.k,unit:''}; return `<tr><td>${esc(c.label)}</td><td class="q">${esc(friendlyVol(i.q*sc,c.unit))}</td></tr>`}).join('');
+  const ing=(r.ing||[]).map(i=>{const c=cat[i.k]||{label:i.k,unit:''}; const w=wt(i.k,i.q*sc); return `<tr><td>${esc(c.label)}</td><td class="q">${esc(friendlyVol(i.q*sc,c.unit))}</td><td class="q wt">${w?'('+esc(w)+')':''}</td></tr>`}).join('');
   const baseYield=parseFloat(r.yield);
   return `<div class="rhead">
     <div class="photo">${pu?`<img src="${esc(pu)}" alt="${esc(r.name)}">`:`<span>No photo yet</span>`}
@@ -985,7 +1053,7 @@ function editRecipe(r){
   ${(r.ing||[]).map((i,n)=>`<tr><td><select data-n="${n}" class="e-k">${opts(i.k)}</select></td><td><input type="number" step="any" class="e-q" value="${i.q}"></td><td><button class="btn small danger" data-act="delrow" title="Remove">✕</button></td></tr>`).join('')}
   </tbody></table>
   <div class="extras"><button class="btn small" data-act="addrow">+ Ingredient</button>
-    <input type="text" id="newing" placeholder="New ingredient name"><select id="newingu">${['C','tsp','tbsp','oz','g','ea','pkg','can'].map(u=>`<option>${u}</option>`).join('')}</select><button class="btn small" data-act="newing">Add to ingredient list</button></div>
+    <input type="text" id="newing" placeholder="New ingredient name"><select id="newingu">${['C','tsp','tbsp','oz','g','ea','pkg','can'].map(u=>`<option>${u}</option>`).join('')}</select><input type="number" id="newingg" step="any" placeholder="grams per unit" style="width:130px" aria-label="Grams per unit"><button class="btn small" data-act="newing">Add to ingredient list</button></div>
   <h3 class="section-h"><label for="e-steps">Instructions (one step per line)</label></h3>
   <textarea id="e-steps" style="min-height:160px">${esc((r.steps||[]).join('\n'))}</textarea>
   <h3 class="section-h"><label for="e-site">Original ingredient list (one per line, reference only)</label></h3>
@@ -1080,19 +1148,20 @@ function viewShop(){
     const groups={}; needRows.forEach(r=>(groups[r.cat]=groups[r.cat]||[]).push(r));
     const left=needRows.filter(r=>!r.got).length+extras.filter(e=>!e.got).length;
     return bar+`<div class="clean"><div class="shopbar"><h2 style="font-size:1.3rem">Cookie shopping · ${esc(S.year)}</h2><span style="flex:1"></span><span class="muted num">${left} left</span></div>
-      ${Object.keys(groups).sort().map(g=>`<h3>${esc(g)}</h3><ul>${groups[g].map(r=>`<li class="${r.got?'got':''}"><label><input type="checkbox" data-act="got" data-k="${esc(r.k)}"${r.got?' checked':''}><span class="t">${esc(r.label)}</span><span class="amt">${r.buy!=null?`${r.buy} × ${esc(r.pkgLabel||'pkg')}`:esc(friendlyVol(r.total,r.unit))}</span></label></li>`).join('')}</ul>`).join('')}
+      ${Object.keys(groups).sort().map(g=>`<h3>${esc(g)}</h3><ul>${groups[g].map(r=>`<li class="${r.got?'got':''}"><label><input type="checkbox" data-act="got" data-k="${esc(r.k)}"${r.got?' checked':''}><span class="t">${esc(r.label)}</span><span class="amt">${r.buy!=null?`${r.buy} × ${esc(r.pkgLabel||'pkg')}`:esc(friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ('+esc(wt(r.k,r.total))+')':'')}</span></label></li>`).join('')}</ul>`).join('')}
       ${extras.length?`<h3>Extras</h3><ul>${extras.map((e,n)=>`<li class="${e.got?'got':''}"><label><input type="checkbox" data-act="gotx" data-n="${n}"${e.got?' checked':''}><span class="t">${esc(e.label)}</span></label></li>`).join('')}</ul>`:''}
       <div class="extras noprint" style="margin-top:18px"><button class="btn" data-act="copylist">Copy list as text</button><button class="btn" data-act="cleargot">Uncheck everything</button></div>
     </div>`;
   }
   const t=rows.map(r=>`<tr class="${r.need?'':'skip'}"><td class="name"><b>${esc(r.label)}</b><div class="uses">${esc(r.uses.join(', '))}</div></td>
-      <td class="q">${esc(friendlyVol(r.total,r.unit))}</td>
+      <td class="q">${esc(friendlyVol(r.total,r.unit))}${wt(r.k,r.total)?`<div class="wt">(${esc(wt(r.k,r.total))})</div>`:''}</td>
+      <td>${(r.unit==='g'||r.unit==='oz')?'<span class="muted">already a weight</span>':`<input type="number" step="any" min="0" value="${gramsPer(r.k)??''}" data-act="gper" data-k="${esc(r.k)}" aria-label="Grams per ${esc(r.unit)} of ${esc(r.label)}" placeholder="?"> <span class="muted" style="font-size:.8rem">g per ${esc(UNIT_LABEL[r.unit]||'each')}</span>`}</td>
       <td><input type="number" step="any" min="0" value="${r.pkg??''}" data-act="pkg" data-k="${esc(r.k)}" aria-label="Amount per package in ${esc(r.unit)}" placeholder="—"> <span class="muted" style="font-size:.8rem">${esc(UNIT_LABEL[r.unit]??r.unit)}</span>
         <input type="text" value="${esc(r.pkgLabel||'')}" data-act="pkglabel" data-k="${esc(r.k)}" placeholder="e.g. 5 lb bag" aria-label="Package name" style="width:110px"></td>
       <td class="q">${r.buy!=null?r.buy:'—'}</td>
       <td><button class="tog ${r.need?'yes':''}" data-act="need" data-k="${esc(r.k)}" aria-pressed="${r.need}">${r.need?'Buy':'Have it'}</button></td></tr>`).join('');
-  return bar+`<p class="muted" style="margin-top:0;font-size:.9rem">Totals add up every cookie tagged ${esc(S.year)} at its batch size. Set "Have it" for anything already in the pantry; only "Buy" items go to the shopping view. Package sizes are saved once and apply to every year.</p>
-    <div style="overflow-x:auto" class="card" ><table class="shop"><thead><tr><th>Ingredient</th><th style="text-align:right">Total needed</th><th>Package size</th><th style="text-align:right">Packages</th><th>Need to buy?</th></tr></thead><tbody>${t}</tbody></table></div>
+  return bar+`<p class="muted" style="margin-top:0;font-size:.9rem">Totals add up every cookie tagged ${esc(S.year)} at its batch size. Set "Have it" for anything already in the pantry; only "Buy" items go to the shopping view. Package sizes are saved once and apply to every year. Weights come from a standard baking chart (1 cup of flour = 120 g); change the grams per unit here and every recipe updates.</p>
+    <div style="overflow-x:auto" class="card" ><table class="shop"><thead><tr><th>Ingredient</th><th style="text-align:right">Total needed</th><th>Weight</th><th>Package size</th><th style="text-align:right">Packages</th><th>Need to buy?</th></tr></thead><tbody>${t}</tbody></table></div>
     <div class="extras"><input type="text" id="xlabel" placeholder="Add something else (sprinkles, tins, parchment…)" style="flex:1;min-width:220px"><button class="btn" data-act="addx">Add to list</button></div>
     ${extras.length?`<div class="extras">${extras.map((e,n)=>`<span class="chip">${esc(e.label)} <button class="btn small danger" style="border:0;padding:0 4px" data-act="delx" data-n="${n}" aria-label="Remove">✕</button></span>`).join('')}</div>`:''}`;
 }
@@ -1133,7 +1202,7 @@ document.addEventListener('click',async e=>{
   else if(a==='addrow'){ $('#e-ing').appendChild($('#rowtpl').content.cloneNode(true)); }
   else if(a==='delrow'){ b.closest('tr').remove(); }
   else if(a==='newing'){ const name=$('#newing').value.trim(); if(!name) return; const unit=$('#newingu').value; const k='x-'+slug(name);
-      setSettings(s=>{s.catalog=s.catalog||{}; s.catalog[k]={label:name,unit,cat:'Other',pkg:null,pkgLabel:''};});
+      setSettings(s=>{s.catalog=s.catalog||{}; const gg=parseFloat($('#newingg').value); s.catalog[k]={label:name,unit,cat:'Other',pkg:null,pkgLabel:'',g:gg>0?gg:null};});
       const tr=$('#rowtpl').content.cloneNode(true); const sel=tr.querySelector('select'); sel.insertAdjacentHTML('beforeend',`<option value="${k}" selected>${esc(name)} (${unit})</option>`); $('#e-ing').appendChild(tr); $('#newing').value=''; }
   else if(a==='saveedit'){ saveEdit(id); }
   else if(a==='delrecipe'){ if(b.dataset.sure){ setOver(id,{deleted:true}); S.edit=false; S.sel=null; render(); toast('Removed from the recipe book'); } else { b.dataset.sure='1'; b.textContent='Click again to remove'; } }
@@ -1158,6 +1227,7 @@ document.addEventListener('change',async e=>{
   else if(a==='mult'){ const v=Math.max(0.25,parseFloat(t.value)||1); setPlan(p=>{p.items[t.dataset.id]=Object.assign({},p.items[t.dataset.id],{mult:v})}); render(); }
   else if(a==='status'){ const id=t.dataset.id,v=t.value; setPlan(p=>{p.items[id]=Object.assign({},p.items[id],{status:v})}); if(v==='done') setYearTag(id,S.year,'m'); else if(rec(id).years[S.year]==='m') setYearTag(id,S.year,'p'); render(); }
   else if(a==='pkg'){ const k=t.dataset.k, v=t.value===''?null:parseFloat(t.value); setSettings(s=>{s.pkg=s.pkg||{}; s.pkg[k]=Object.assign({},s.pkg[k],{size:v})}); render(); }
+  else if(a==='gper'){ const k=t.dataset.k, v=t.value===''?null:parseFloat(t.value); setSettings(s=>{s.pkg=s.pkg||{}; s.pkg[k]=Object.assign({},s.pkg[k],{g:v})}); render(); }
   else if(a==='pkglabel'){ const k=t.dataset.k; setSettings(s=>{s.pkg=s.pkg||{}; s.pkg[k]=Object.assign({},s.pkg[k],{label:t.value})}); render(); }
   else if(a==='got'){ const k=t.dataset.k; setPlan(p=>{p.got[k]=t.checked}); render(); }
   else if(a==='gotx'){ const n=+t.dataset.n; setPlan(p=>{p.extras[n].got=t.checked}); render(); }
@@ -1206,7 +1276,7 @@ async function uploadPhoto(id,file){
 function shrink(file){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const s=Math.min(1,1200/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=img.width*s; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,c.width,c.height); c.toBlob(b=>res(b||file),'image/jpeg',0.85); }; img.onerror=()=>res(file); img.src=URL.createObjectURL(file); }); }
 async function copyList(){
   const rows=shopping().filter(r=>r.need&&!r.got); const ex=(plan().extras||[]).filter(e=>!e.got);
-  const txt=`Cookie shopping ${S.year}\n`+rows.map(r=>`☐ ${r.label}: ${r.buy!=null?r.buy+' × '+(r.pkgLabel||'pkg')+' ('+friendlyVol(r.total,r.unit)+')':friendlyVol(r.total,r.unit)}`).join('\n')+(ex.length?'\n'+ex.map(e=>'☐ '+e.label).join('\n'):'');
+  const txt=`Cookie shopping ${S.year}\n`+rows.map(r=>`☐ ${r.label}: ${(r.buy!=null?r.buy+' × '+(r.pkgLabel||'pkg')+' ('+friendlyVol(r.total,r.unit)+')':friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ['+wt(r.k,r.total)+']':'')}`).join('\n')+(ex.length?'\n'+ex.map(e=>'☐ '+e.label).join('\n'):'');
   try{ await navigator.clipboard.writeText(txt); toast('Copied. Paste it into a note or text message.'); }catch(e){ toast('Copy was blocked by the browser.'); }
 }
 async function addRecipe(useAI){
@@ -1219,7 +1289,7 @@ async function addRecipe(useAI){
     const prompt=`You turn a pasted cookie recipe into JSON for a baker's tracker. Return ONLY a JSON object with keys:
 name (string), yield (number of pieces or null), chill (hours as text like "1" or "1-2", "" if none), cook (minutes as text like "10-12"), temp (oven °F number or null), freezable (boolean; true if the recipe says the dough or cookies freeze well), kind ("bake","nobake","candy" or "icing"),
 siteIng (array of the ingredient lines as written), steps (array of 4-8 short steps in your own words, keeping temps and times),
-ing (array of {k,q} mapping each ingredient onto this pantry list, with q converted to the unit in brackets; skip salt and water; use k="new:<Label>|<unit>" when nothing fits). Units: C=cups, tbsp, tsp, oz, g, ea=each.
+ing (array of {k,q} mapping each ingredient onto this pantry list, with q converted to the unit in brackets; skip salt and water; use k="new:<Label>|<unit>|<grams per 1 unit>" when nothing fits, using standard baking weight charts). Units: C=cups, tbsp, tsp, oz, g, ea=each.
 Pantry list: ${keys}
 Name given by the baker: ${name||'(none)'}
 Recipe text:
@@ -1229,7 +1299,7 @@ ${text.slice(0,12000)}`;
       const o=(out&&typeof out==='object')?out:JSON.parse(String(out));
       const newCat={}; const ing=[];
       (o.ing||[]).forEach(i=>{ let k=String(i.k||''); const q=parseFloat(i.q); if(!(q>0)) return;
-        if(k.startsWith('new:')){ const [lab,unit]=k.slice(4).split('|'); k='x-'+slug(lab); newCat[k]={label:lab,unit:unit||'ea',cat:'Other',pkg:null,pkgLabel:''}; }
+        if(k.startsWith('new:')){ const [lab,unit,gg]=k.slice(4).split('|'); k='x-'+slug(lab); newCat[k]={label:lab,unit:unit||'ea',cat:'Other',pkg:null,pkgLabel:'',g:parseFloat(gg)>0?parseFloat(gg):null}; }
         if(cat[k]||newCat[k]) ing.push({k,q}); });
       if(Object.keys(newCat).length) setSettings(s=>{s.catalog=Object.assign({},s.catalog||{},newCat)});
       r=Object.assign(r,{name:name||o.name||r.name,yield:+o.yield||null,chill:o.chill||'',cook:o.cook||'',temp:+o.temp||null,freezable:!!o.freezable,kind:o.kind||'bake',siteIng:o.siteIng||[],steps:o.steps||[],ing});

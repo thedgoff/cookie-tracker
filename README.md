@@ -7,8 +7,9 @@ A single-file HTML app for planning a holiday baking season: a recipe book, a ba
 ## What it does
 - Recipe book with batch scaling, year tags, notes and an edit mode
 - Bake plan with a suggested order (freezable first, long chills next, then grouped by oven temperature and shared ingredients) and drag-to-reorder
+- Gram weights in parentheses next to every cup, spoon and "each" amount, from a standard baking chart and editable per ingredient
 - Shopping list that adds up ingredients across the year's recipes, with Buy / Have it toggles and a checklist view
-- A starter pantry catalog (ingredients, units, package sizes)
+- A starter pantry catalog (ingredients, units, package sizes, grams per unit)
 
 ## Using it
 Open `cookie-tracker.html` in a browser. Add recipes with the "Add a recipe" tab, or edit `<script type="application/json" id="library">` in the file directly. The format is described in `PROMPT.md`.

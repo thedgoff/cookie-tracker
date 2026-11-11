@@ -11,6 +11,7 @@ I've attached `cookie-tracker.html`, a finished Christmas cookie tracker app. Pl
 ## What the app already does
 - **Recipe book:** sidebar index and full recipe pages with batch scaling, year tags, notes, photo upload and an edit mode.
 - **Bake plan:** pick cookies for a year, get a suggested bake order (freezable first, long-chill doughs next, then grouped by oven temp and shared ingredients, no-bake and icing last), drag to reorder, and track status.
+- **Weights:** every volume amount also shows its weight in grams, editable per ingredient.
 - **Shopping list:** adds up ingredients for the year at each batch size and rounds up to packages, with Buy / Have it toggles and a clean checklist view that crosses items out.
 - **Add a recipe:** paste recipe text and Claude fills in the details.
 
@@ -27,7 +28,7 @@ I've attached `cookie-tracker.html`, a finished Christmas cookie tracker app. Pl
 ```json
 {
   "catalog": {
-    "flour": {"label": "Flour (all-purpose)", "unit": "C", "cat": "Baking staples", "pkg": 18, "pkgLabel": "5 lb bag"}
+    "flour": {"label": "Flour (all-purpose)", "unit": "C", "cat": "Baking staples", "pkg": 18, "pkgLabel": "5 lb bag", "g": 120}
   },
   "recipes": [
     {
@@ -55,6 +56,7 @@ What the fields mean:
 - **unit:** one of `C` (cups), `tsp`, `tbsp`, `oz`, `g`, `ea` (each), `pkg`, `can`.
 - **pkg:** how many of that unit come in one store package. Use `null` if unknown.
 - **cat:** the store section shown in the shopping view.
+- **g:** grams in one unit (e.g. 120 for a cup of flour), from a standard baking weight chart. The app shows the weight in parentheses next to volume amounts. Leave it out for items already measured in g or oz.
 - **years:** `m` = made that year, `p` = on the list but not made, `h` = unclear (shown in gold).
 - **kind:** one of `bake`, `nobake`, `candy`, `icing`.
 - **chill:** hours, as text: "1", "1-2", "0.5+0.5", or "1-overnight".
