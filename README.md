@@ -8,6 +8,7 @@ A single-file HTML app for planning a holiday baking season: a recipe book, a ba
 - Recipe book with batch scaling, year tags, notes and an edit mode
 - Bake plan with a suggested order (freezable first, long chills next, then grouped by oven temperature and shared ingredients) and drag-to-reorder
 - Gram weights in parentheses next to every cup, spoon and "each" amount, from a standard baking chart and editable per ingredient
+- Optional cost estimates on the shopping list and recipe pages, once store prices are saved (see `prompt.md`)
 - Shopping list that adds up ingredients across the year's recipes, with Buy / Have it toggles and a checklist view
 - A starter pantry catalog (ingredients, units, package sizes, grams per unit)
 
