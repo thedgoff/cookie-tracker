@@ -848,7 +848,11 @@ function catalog(){ return Object.assign({}, S.lib?S.lib.catalog:{}, S.settings.
 function gramsPer(k){ const o=(S.settings.pkg||{})[k]||{}; if(o.g!==undefined&&o.g!==null&&o.g!=='') return +o.g; const c=catalog()[k]||{}; return c.g||null; }
 function fmtG(g){ if(!(g>0)) return ''; if(g<10) return (Math.round(g*10)/10)+' g'; if(g<100) return Math.round(g)+' g'; if(g<1000) return Math.round(g/5)*5+' g'; return (Math.round(g/50)*50/1000).toFixed(2).replace(/0$/,'')+' kg'; }
 function wt(k,q){ const c=catalog()[k]||{}; if(c.unit==='g'||c.unit==='oz') return ''; const g=gramsPer(k); return g?fmtG(g*q):''; }
-function pkgOf(k){ const c=catalog()[k]||{}; const o=(S.settings.pkg||{})[k]||{}; return {size: o.size!==undefined?o.size:c.pkg, label: o.label!==undefined?o.label:(c.pkgLabel||'')}; }
+function priceOf(k){ const a=((S.settings.prices||{}).items||{})[k]; if(!a) return null; const it=Array.isArray(a)?{id:a[0],price:a[1],club:a[2],size:a[3],name:a[4],units:a[5]}:a; return it.price!=null?it:null; }
+const money=v=>v==null||isNaN(v)?'':'$'+v.toFixed(2);
+function unitCost(k){ const pr=priceOf(k), pk=pkgOf(k); return pr&&pk.size?pr.price/pk.size:null; }
+function recipeCost(r,sc){ let t=0,miss=0; (r.ing||[]).forEach(i=>{ const u=unitCost(i.k); if(u==null) miss++; else t+=u*i.q*sc; }); return {t,miss}; }
+function pkgOf(k){ const c=catalog()[k]||{}; const o=(S.settings.pkg||{})[k]||{}; const pr=priceOf(k); return {size: o.size!==undefined&&o.size!==null?o.size:(pr&&pr.units?pr.units:c.pkg), label: o.label!==undefined?o.label:(pr&&pr.units?pr.size:(c.pkgLabel||''))}; }
 function recipes(){
   const base={}; (S.lib?S.lib.recipes:[]).forEach(r=>base[r.id]=r);
   const ids=new Set([...Object.keys(base),...Object.keys(S.over)]);
@@ -1025,6 +1029,7 @@ function showRecipe(r){
       <div>
         <h3 class="section-h">Ingredients ${sc!==1?`<span class="muted" style="font-size:.85rem">(${+sc.toFixed(2)}× the saved amounts)</span>`:''}</h3>
         ${ing?`<table><tbody>${ing}</tbody></table>`:'<p class="muted">No ingredients entered yet. Use Edit recipe to add them.</p>'}
+        ${(()=>{ if(!S.settings.prices||!(r.ing||[]).length) return ''; const c=recipeCost(r,sc); const n=parseFloat(r.yield)*sc; return `<p class="muted" style="font-size:.88rem;margin:8px 0 0">Ingredient cost at ${esc(S.settings.prices.store||'your store')}: about <b>${money(c.t)}</b>${n?` (${money(c.t/n)} per cookie)`:''}${c.miss?` · ${c.miss} ingredient${c.miss>1?'s':''} without a price`:''}</p>`; })()}
         ${(r.siteIng&&r.siteIng.length)?`<details><summary>Original ingredient list${r.siteYield?' ('+esc(r.siteYield)+')':''}</summary><ul>${r.siteIng.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></details>`:''}
       </div>
       <div>
@@ -1134,21 +1139,23 @@ function shopping(){
     const row=rows[i.k]||(rows[i.k]={k:i.k,label:c.label,unit:c.unit,cat:c.cat||'Other',total:0,uses:[]});
     row.total+=i.q*m; row.uses.push(r.name); }); });
   const p=plan();
-  return Object.values(rows).map(x=>{ const pk=pkgOf(x.k); x.pkg=pk.size; x.pkgLabel=pk.label; x.buy=pk.size?Math.ceil(x.total/pk.size-1e-9):null; x.need=p.need&&p.need[x.k]===false?false:true; x.got=!!(p.got&&p.got[x.k]); return x; })
+  return Object.values(rows).map(x=>{ const pk=pkgOf(x.k); x.pkg=pk.size; x.pkgLabel=pk.label; x.buy=pk.size?Math.ceil(x.total/pk.size-1e-9):null; x.price=priceOf(x.k); x.cost=x.price&&x.buy!=null?x.buy*x.price.price:null; x.useCost=unitCost(x.k)!=null?unitCost(x.k)*x.total:null; x.need=p.need&&p.need[x.k]===false?false:true; x.got=!!(p.got&&p.got[x.k]); return x; })
     .sort((a,b)=>a.label.localeCompare(b.label));
 }
+function costLine(rows){ const pr=S.settings.prices; if(!pr) return ''; const need=rows.filter(r=>r.need); const buy=need.reduce((a,r)=>a+(r.cost||0),0); const used=rows.reduce((a,r)=>a+(r.useCost||0),0); const miss=need.filter(r=>r.cost==null).length;
+  return ` · <b>${money(buy)}</b> to buy, ${money(used)} worth used${miss?` (${miss} items unpriced)`:''} · ${esc(pr.store||'')} prices from ${esc(pr.updated||'')}`; }
 function viewShop(){
   const rows=shopping(); const p=plan(); const needRows=rows.filter(r=>r.need); const extras=p.extras||[];
   if(!planRecipes().length) return `<div class="banner">No cookies are tagged for ${esc(S.year)} yet. Pick them on the Bake plan tab and the shopping list fills in.</div>`;
   const bar=`<div class="shopbar noprint"><h2 style="font-size:1.4rem">${esc(S.year)} shopping</h2>
-    <span class="muted">${planRecipes().length} cookies · ${needRows.length} of ${rows.length} ingredients to buy</span><span style="flex:1"></span>
+    <span class="muted">${planRecipes().length} cookies · ${needRows.length} of ${rows.length} ingredients to buy${costLine(rows)}</span><span style="flex:1"></span>
     <button class="btn${S.shopView==='table'?' primary':''}" data-act="shopview" data-v="table">Plan the list</button>
     <button class="btn${S.shopView==='clean'?' primary':''}" data-act="shopview" data-v="clean">Shopping view</button></div>`;
   if(S.shopView==='clean'){
     const groups={}; needRows.forEach(r=>(groups[r.cat]=groups[r.cat]||[]).push(r));
     const left=needRows.filter(r=>!r.got).length+extras.filter(e=>!e.got).length;
-    return bar+`<div class="clean"><div class="shopbar"><h2 style="font-size:1.3rem">Cookie shopping · ${esc(S.year)}</h2><span style="flex:1"></span><span class="muted num">${left} left</span></div>
-      ${Object.keys(groups).sort().map(g=>`<h3>${esc(g)}</h3><ul>${groups[g].map(r=>`<li class="${r.got?'got':''}"><label><input type="checkbox" data-act="got" data-k="${esc(r.k)}"${r.got?' checked':''}><span class="t">${esc(r.label)}</span><span class="amt">${r.buy!=null?`${r.buy} × ${esc(r.pkgLabel||'pkg')}`:esc(friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ('+esc(wt(r.k,r.total))+')':'')}</span></label></li>`).join('')}</ul>`).join('')}
+    return bar+`<div class="clean"><div class="shopbar"><h2 style="font-size:1.3rem">Cookie shopping · ${esc(S.year)}</h2><span style="flex:1"></span><span class="muted num">${left} left${S.settings.prices?' · about '+money(needRows.filter(r=>!r.got).reduce((t,r)=>t+(r.cost||0),0))+' still to buy':''}</span></div>
+      ${Object.keys(groups).sort().map(g=>`<h3>${esc(g)}</h3><ul>${groups[g].map(r=>`<li class="${r.got?'got':''}"><label><input type="checkbox" data-act="got" data-k="${esc(r.k)}"${r.got?' checked':''}><span class="t">${esc(r.label)}</span><span class="amt">${r.buy!=null?`${r.buy} × ${esc(r.pkgLabel||'pkg')}`:esc(friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ('+esc(wt(r.k,r.total))+')':'')}${r.cost!=null?' · '+money(r.cost):''}</span></label></li>`).join('')}</ul>`).join('')}
       ${extras.length?`<h3>Extras</h3><ul>${extras.map((e,n)=>`<li class="${e.got?'got':''}"><label><input type="checkbox" data-act="gotx" data-n="${n}"${e.got?' checked':''}><span class="t">${esc(e.label)}</span></label></li>`).join('')}</ul>`:''}
       <div class="extras noprint" style="margin-top:18px"><button class="btn" data-act="copylist">Copy list as text</button><button class="btn" data-act="cleargot">Uncheck everything</button></div>
     </div>`;
@@ -1159,9 +1166,11 @@ function viewShop(){
       <td><input type="number" step="any" min="0" value="${r.pkg??''}" data-act="pkg" data-k="${esc(r.k)}" aria-label="Amount per package in ${esc(r.unit)}" placeholder="—"> <span class="muted" style="font-size:.8rem">${esc(UNIT_LABEL[r.unit]??r.unit)}</span>
         <input type="text" value="${esc(r.pkgLabel||'')}" data-act="pkglabel" data-k="${esc(r.k)}" placeholder="e.g. 5 lb bag" aria-label="Package name" style="width:110px"></td>
       <td class="q">${r.buy!=null?r.buy:'—'}</td>
+      <td class="q">${r.price?`${money(r.price.price)}<div class="uses" style="white-space:normal;max-width:180px;text-align:right">${esc(r.price.name)}${r.price.size?' · '+esc(r.price.size):''}${r.price.club&&r.price.club<r.price.price?' · Club '+money(r.price.club):''}</div>`:'<span class="muted">—</span>'}</td>
+      <td class="q">${r.cost!=null?money(r.cost):'—'}</td>
       <td><button class="tog ${r.need?'yes':''}" data-act="need" data-k="${esc(r.k)}" aria-pressed="${r.need}">${r.need?'Buy':'Have it'}</button></td></tr>`).join('');
   return bar+`<p class="muted" style="margin-top:0;font-size:.9rem">Totals add up every cookie tagged ${esc(S.year)} at its batch size. Set "Have it" for anything already in the pantry; only "Buy" items go to the shopping view. Package sizes are saved once and apply to every year. Weights come from a standard baking chart (1 cup of flour = 120 g); change the grams per unit here and every recipe updates.</p>
-    <div style="overflow-x:auto" class="card" ><table class="shop"><thead><tr><th>Ingredient</th><th style="text-align:right">Total needed</th><th>Weight</th><th>Package size</th><th style="text-align:right">Packages</th><th>Need to buy?</th></tr></thead><tbody>${t}</tbody></table></div>
+    <div style="overflow-x:auto" class="card" ><table class="shop"><thead><tr><th>Ingredient</th><th style="text-align:right">Total needed</th><th>Weight</th><th>Package size</th><th style="text-align:right">Packages</th><th style="text-align:right">Price</th><th style="text-align:right">Est. cost</th><th>Need to buy?</th></tr></thead><tbody>${t}</tbody></table></div>
     <div class="extras"><input type="text" id="xlabel" placeholder="Add something else (sprinkles, tins, parchment…)" style="flex:1;min-width:220px"><button class="btn" data-act="addx">Add to list</button></div>
     ${extras.length?`<div class="extras">${extras.map((e,n)=>`<span class="chip">${esc(e.label)} <button class="btn small danger" style="border:0;padding:0 4px" data-act="delx" data-n="${n}" aria-label="Remove">✕</button></span>`).join('')}</div>`:''}`;
 }
@@ -1276,7 +1285,7 @@ async function uploadPhoto(id,file){
 function shrink(file){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const s=Math.min(1,1200/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=img.width*s; c.height=img.height*s; c.getContext('2d').drawImage(img,0,0,c.width,c.height); c.toBlob(b=>res(b||file),'image/jpeg',0.85); }; img.onerror=()=>res(file); img.src=URL.createObjectURL(file); }); }
 async function copyList(){
   const rows=shopping().filter(r=>r.need&&!r.got); const ex=(plan().extras||[]).filter(e=>!e.got);
-  const txt=`Cookie shopping ${S.year}\n`+rows.map(r=>`☐ ${r.label}: ${(r.buy!=null?r.buy+' × '+(r.pkgLabel||'pkg')+' ('+friendlyVol(r.total,r.unit)+')':friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ['+wt(r.k,r.total)+']':'')}`).join('\n')+(ex.length?'\n'+ex.map(e=>'☐ '+e.label).join('\n'):'');
+  const txt=`Cookie shopping ${S.year}\n`+rows.map(r=>`☐ ${r.label}: ${(r.buy!=null?r.buy+' × '+(r.pkgLabel||'pkg')+' ('+friendlyVol(r.total,r.unit)+')':friendlyVol(r.total,r.unit))+(wt(r.k,r.total)?' ['+wt(r.k,r.total)+']':'')+(r.cost!=null?' ~'+money(r.cost):'')}`).join('\n')+(ex.length?'\n'+ex.map(e=>'☐ '+e.label).join('\n'):'');
   try{ await navigator.clipboard.writeText(txt); toast('Copied. Paste it into a note or text message.'); }catch(e){ toast('Copy was blocked by the browser.'); }
 }
 async function addRecipe(useAI){

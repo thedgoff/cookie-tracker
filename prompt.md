@@ -12,6 +12,7 @@ I've attached `cookie-tracker.html`, a finished Christmas cookie tracker app. Pl
 - **Recipe book:** sidebar index and full recipe pages with batch scaling, year tags, notes, photo upload and an edit mode.
 - **Bake plan:** pick cookies for a year, get a suggested bake order (freezable first, long-chill doughs next, then grouped by oven temp and shared ingredients, no-bake and icing last), drag to reorder, and track status.
 - **Weights:** every volume amount also shows its weight in grams, editable per ingredient.
+- **Cost estimates (optional):** with store prices saved, the shopping list shows price per package, estimated cost and a total, and each recipe shows its ingredient cost and cost per cookie.
 - **Shopping list:** adds up ingredients for the year at each batch size and rounds up to packages, with Buy / Have it toggles and a clean checklist view that crosses items out.
 - **Add a recipe:** paste recipe text and Claude fills in the details.
 
@@ -66,6 +67,21 @@ What the fields mean:
 - **steps:** 4–8 short steps. Use steps I provided or ones written in your own words from my notes, keeping temps and times. If I only gave a link and no text, leave the list empty and don't reproduce the linked page's instructions.
 - **siteIng / siteYield:** optional reference copies of the original ingredient lines and yield, only if I pasted them. Leave empty otherwise.
 - **url:** a link to the original recipe, or an empty string.
+
+## Optional: store prices
+If I ask for prices, look up current prices at my store for each pantry item and save them in the app's saved data at `settings/main` → `prices` (not in the library JSON):
+
+```json
+"prices": {
+  "store": "Wegmans Brockport",
+  "updated": "Nov 12, 2026",
+  "items": {
+    "flour": ["107102", 2.49, 1.79, "5 lb.", "Wegmans All Purpose Unbleached Flour", 18.9]
+  }
+}
+```
+
+Each item is `[store product ID, regular price, member/club price or null, package size as printed, product name, package size in the pantry item's unit]`. The last number replaces the catalog's `pkg` for package counts. Only use a store's own published or permitted data sources; skip items you can't match.
 
 ## Notes
 - Artifacts can't show images from other websites, so photos come from the "Add photo" button.
